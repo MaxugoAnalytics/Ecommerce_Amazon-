@@ -6,10 +6,10 @@ This project focuses on analyzing an Amazon e-commerce dataset to uncover insigh
 ## **About the Author**
 Hi! I'm **Maxwell Adigwe**, a Data Analyst and Data Scientist specializing in e-commerce analytics and machine learning applications. I am passionate about extracting actionable insights from data to drive business growth and deliver customer value.
 
-- **[LinkedIn](https://www.linkedin.com/in/your-profile)**  
-- **[Portfolio](https://your-portfolio-link.com)**  
-- **[Streamlit App](https://your-streamlit-app-link.com)**  
-- **[Hugging Face App](https://your-hugging-face-app-link.com)**  
+- **[LinkedIn](https://www.linkedin.com/in/maxwell-adigwe-7053a4312/)**  
+- **[Portfolio](https://www.datascienceportfol.io/maxanalytics)**  
+- **[Streamlit App](https://4zqbbzjy5woyrvhf23qvyu.streamlit.app/)**  
+- **[Hugging Face App](https://huggingface.co/spaces/Nalytics/Ecommerce_Amazon_Reports)**  
 
 ## **Dataset**
 The dataset used in this project can be downloaded directly from Kaggle:  
