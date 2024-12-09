@@ -164,7 +164,7 @@ with col6:
     )
     st.plotly_chart(fig_hist, use_container_width=True)
 
-
+with col7:
 st.subheader("Monthly Orders Trend")
 monthly_orders = filtered_data.groupby("Month")["Order"].sum().reset_index()
 fig_month = px.line(
