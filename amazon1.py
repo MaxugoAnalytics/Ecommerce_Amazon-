@@ -165,20 +165,16 @@ with col6:
     st.plotly_chart(fig_hist, use_container_width=True)
 
 with col7:
-    # Sales Channel Distribution (Bar Chart)
-    st.subheader("Sales Channel Distribution")
-    if "Sales Channel" in filtered_data.columns:  # Avoid errors if the column is missing
-        sales_channel_data = filtered_data.groupby("Sales Channel")["Order"].sum().reset_index()
-        fig_sales_channel = px.bar(
-            sales_channel_data,
-            x="Sales Channel",
-            y="Order",
-            title="Orders by Sales Channel",
-            labels={"Sales Channel": "Channel", "Order": "Total Orders"},
-            color="Sales Channel",
-            color_discrete_sequence=px.colors.qualitative.Pastel
-        )
-        st.plotly_chart(fig_sales_channel, use_container_width=True)
+ st.subheader("Monthly Orders Trend")
+    daily_orders = filtered_data.groupby("Month")["Order"].sum().reset_index()
+    fig_day = px.line(
+        daily_orders,
+        x="Month",
+        y="Order",
+        title="Monthly Order Trends",
+        labels={"Month": "Month", "Order": "Total Orders"}
+    )
+    st.plotly_chart(fig_month, use_container_width=True)
 
 with col8:
     # Revenue vs Orders Scatter Plot
