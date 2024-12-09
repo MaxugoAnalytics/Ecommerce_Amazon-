@@ -52,8 +52,8 @@ selected_b2b = st.sidebar.multiselect(
 )
 
 # Apply filters
-filtered_data = amazon[
-    (amazon["Style"].isin(selected_styles)) &
+filtered_data = amazon[(
+    amazon["Style"].isin(selected_styles)) &
     (amazon["ship-state"].isin(selected_states)) &
     (amazon["Fulfilment"].isin(selected_fulfilment)) &
     (amazon["B2B"].isin(selected_b2b))
@@ -78,96 +78,88 @@ with col4:
 with col5:
     st.metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
 
-# Fulfilment breakdown
-st.subheader("Orders by Fulfilment Type")
-fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
-fig_fulfilment = px.pie(
-    fulfilment_data,
-    names="Fulfilment",
-    values="Order",
-    color_discrete_sequence=px.colors.qualitative.Set3,
-    title="Orders by Fulfilment Type"
-)
-st.plotly_chart(fig_fulfilment, use_container_width=True)
+# Organizing visuals into two rows with three columns each
+col1, col2, col3 = st.columns(3)
 
-# Orders by Day (Line Chart)
-st.subheader("Daily Orders Trend")
-daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
-fig_day = px.line(
-    daily_orders,
-    x="Day",
-    y="Order",
-    title="Orders by Day",
-    labels={"Day": "Day", "Order": "Total Orders"}
-)
-st.plotly_chart(fig_day, use_container_width=True)
-
-# Orders by state
-st.subheader("Orders by Shipping State")
-st.write("This bar chart shows the distribution of orders across different shipping states.")
-state_data = filtered_data.groupby("ship-state")["Order"].sum().reset_index()
-fig_state = px.bar(
-    state_data,
-    x="ship-state",
-    y="Order",
-    title="Orders by State",
-    labels={"ship-state": "State", "Order": "Total Orders"},
-    color="ship-state",
-    color_discrete_sequence=px.colors.qualitative.Set3
-)
-st.plotly_chart(fig_state, use_container_width=True)
-
-# B2B vs. Non-B2B Orders (Pie Chart)
-st.subheader("B2B vs. Consumer Orders")
-b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
-fig_b2b = px.pie(
-    b2b_data,
-    names="B2B",
-    values="Order",
-    title="B2B Orders vs. Consumer Orders",
-    color_discrete_sequence=["#1f77b4", "#ff7f0e"]
-)
-st.plotly_chart(fig_b2b, use_container_width=True)
-
-# Weekly Revenue Trends (Line Chart)
-st.subheader("Weekly Revenue Trends")
-weekly_revenue = filtered_data.groupby("Week")["Revenue per Order"].sum().reset_index()
-fig_weekly_revenue = px.line(
-    weekly_revenue,
-    x="Week",
-    y="Revenue per Order",
-    title="Weekly Revenue Trends",
-    labels={"Week": "Week Number", "Revenue per Order": "Revenue"}
-)
-st.plotly_chart(fig_weekly_revenue, use_container_width=True)
-
-# Revenue Distribution (Histogram)
-st.subheader("Revenue Distribution")
-fig_hist = px.histogram(
-    filtered_data,
-    x="Revenue per Order",
-    title="Distribution of Revenue per Order",
-    color_discrete_sequence=["#636EFA"]
-)
-st.plotly_chart(fig_hist, use_container_width=True)
-
-# Sales Channel Distribution (Bar Chart)
-st.subheader("Sales Channel Distribution")
-if "Sales Channel" in filtered_data.columns:  # Avoid errors if the column is missing
-    sales_channel_data = filtered_data.groupby("Sales Channel")["Order"].sum().reset_index()
-    fig_sales_channel = px.bar(
-        sales_channel_data,
-        x="Sales Channel",
-        y="Order",
-        title="Orders by Sales Channel",
-        labels={"Sales Channel": "Channel", "Order": "Total Orders"},
-        color="Sales Channel",
-        color_discrete_sequence=px.colors.qualitative.Pastel
+# First row of visuals
+with col1:
+    # Fulfilment breakdown (Pie Chart)
+    st.subheader("Orders by Fulfilment Type")
+    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
+    fig_fulfilment = px.pie(
+        fulfilment_data,
+        names="Fulfilment",
+        values="Order",
+        color_discrete_sequence=px.colors.qualitative.Set3,
+        title="Orders by Fulfilment Type"
     )
-    st.plotly_chart(fig_sales_channel, use_container_width=True)
+    st.plotly_chart(fig_fulfilment, use_container_width=True)
 
-# Footer Section
-st.markdown("---")
-st.markdown("**Dashboard by Maxwell Adigwe** | Powered by Streamlit and Plotly")
+with col2:
+    # Orders by Day (Line Chart)
+    st.subheader("Daily Orders Trend")
+    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
+    fig_day = px.line(
+        daily_orders,
+        x="Day",
+        y="Order",
+        title="Orders by Day",
+        labels={"Day": "Day", "Order": "Total Orders"}
+    )
+    st.plotly_chart(fig_day, use_container_width=True)
 
+with col3:
+    # Orders by state (Bar Chart)
+    st.subheader("Orders by Shipping State")
+    st.write("This bar chart shows the distribution of orders across different shipping states.")
+    state_data = filtered_data.groupby("ship-state")["Order"].sum().reset_index()
+    fig_state = px.bar(
+        state_data,
+        x="ship-state",
+        y="Order",
+        title="Orders by State",
+        labels={"ship-state": "State", "Order": "Total Orders"},
+        color="ship-state",
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    st.plotly_chart(fig_state, use_container_width=True)
 
+# Second row of visuals
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    # B2B vs. Non-B2B Orders (Pie Chart)
+    st.subheader("B2B vs. Consumer Orders")
+    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
+    fig_b2b = px.pie(
+        b2b_data,
+        names="B2B",
+        values="Order",
+        title="B2B Orders vs. Consumer Orders",
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"]
+    )
+    st.plotly_chart(fig_b2b, use_container_width=True)
+
+with col5:
+    # Weekly Revenue Trends (Line Chart)
+    st.subheader("Weekly Revenue Trends")
+    weekly_revenue = filtered_data.groupby("Week")["Revenue per Order"].sum().reset_index()
+    fig_weekly_revenue = px.line(
+        weekly_revenue,
+        x="Week",
+        y="Revenue per Order",
+        title="Weekly Revenue Trends",
+        labels={"Week": "Week Number", "Revenue per Order": "Revenue"}
+    )
+    st.plotly_chart(fig_weekly_revenue, use_container_width=True)
+
+with col6:
+    # Revenue Distribution (Histogram)
+    st.subheader("Revenue Distribution")
+    fig_hist = px.histogram(
+        filtered_data,
+        x="Revenue per Order",
+        title="Distribution of Revenue per Order",
+        color_discrete_sequence=["#636EFA"]
+    )
+    st.plotly_chart(fig_hist, use_container_width=True)
