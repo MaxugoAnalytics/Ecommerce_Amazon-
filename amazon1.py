@@ -78,8 +78,8 @@ with col4:
 with col5:
     st.metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
 
-# Organizing visuals into two rows with three columns each
-col1, col2, col3 = st.columns(3)
+# Organizing visuals into two rows with four columns each
+col1, col2, col3, col4 = st.columns(4)
 
 # First row of visuals
 with col1:
@@ -124,9 +124,6 @@ with col3:
     )
     st.plotly_chart(fig_state, use_container_width=True)
 
-# Second row of visuals
-col4, col5, col6 = st.columns(3)
-
 with col4:
     # B2B vs. Non-B2B Orders (Pie Chart)
     st.subheader("B2B vs. Consumer Orders")
@@ -139,6 +136,9 @@ with col4:
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
+
+# Second row of visuals
+col5, col6, col7, col8 = st.columns(4)
 
 with col5:
     # Weekly Revenue Trends (Line Chart)
@@ -163,3 +163,33 @@ with col6:
         color_discrete_sequence=["#636EFA"]
     )
     st.plotly_chart(fig_hist, use_container_width=True)
+
+with col7:
+    # Sales Channel Distribution (Bar Chart)
+    st.subheader("Sales Channel Distribution")
+    if "Sales Channel" in filtered_data.columns:  # Avoid errors if the column is missing
+        sales_channel_data = filtered_data.groupby("Sales Channel")["Order"].sum().reset_index()
+        fig_sales_channel = px.bar(
+            sales_channel_data,
+            x="Sales Channel",
+            y="Order",
+            title="Orders by Sales Channel",
+            labels={"Sales Channel": "Channel", "Order": "Total Orders"},
+            color="Sales Channel",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        st.plotly_chart(fig_sales_channel, use_container_width=True)
+
+with col8:
+    # Revenue vs Orders Scatter Plot
+    st.subheader("Revenue vs Orders")
+    fig_revenue_orders = px.scatter(
+        filtered_data,
+        x="Order",
+        y="Revenue per Order",
+        color="Style",
+        title="Revenue vs Orders",
+        labels={"Order": "Total Orders", "Revenue per Order": "Revenue per Order"}
+    )
+    st.plotly_chart(fig_revenue_orders, use_container_width=True)
+
