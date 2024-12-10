@@ -70,7 +70,7 @@ def load_data():
 amazon = load_data()
 
 # Header
-st.markdown('<div class="main-header">Amazon Sales Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">Amazon Sales Dashboard by Maxwell Adigwe</div>', unsafe_allow_html=True)
 
 # Metrics Section
 st.subheader("Key Metrics")
@@ -115,7 +115,7 @@ metrics_row[4].markdown(
 st.subheader("Data Visualizations")
 
 # Row 1 (Three Columns with Further Reduced Widths)
-row1 = st.columns([0.05, 0.05, 0.05])  # Reduced widths even more
+row1 = st.columns([0.017, 0.017, 0.017])  # Further reduced column sizes
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -184,7 +184,7 @@ with row1[2]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Row 2 (Three Columns with Further Reduced Widths)
-row2 = st.columns([0.05, 0.05, 0.05])  # Reduced widths even more
+row2 = st.columns([0.017, 0.017, 0.017])  # Further reduced column sizes
 
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -238,6 +238,3 @@ with row2[2]:
     )
     st.plotly_chart(fig_top_states, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
-
-
