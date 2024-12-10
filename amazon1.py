@@ -46,7 +46,7 @@ st.markdown("""
 
         .visual-title {
             font-weight: bold;
-            font-size: 14px;  /* Smaller title font size */
+            font-size: 12px;  /* Reduced title font size */
             text-align: center;
             color: #232F3E;
             margin-bottom: 5px;  /* Reduced space between title and chart */
@@ -115,7 +115,7 @@ metrics_row[4].markdown(
 st.subheader("Data Visualizations")
 
 # Row 1 (Three Columns with Further Reduced Widths)
-row1 = st.columns([0.2, 0.2, 0.2])  # Reduced widths further
+row1 = st.columns([0.05, 0.05, 0.05])  # Reduced widths even more
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -184,7 +184,7 @@ with row1[2]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Row 2 (Three Columns with Further Reduced Widths)
-row2 = st.columns([0.2, 0.2, 0.2])  # Reduced widths further
+row2 = st.columns([0.05, 0.05, 0.05])  # Reduced widths even more
 
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -238,5 +238,6 @@ with row2[2]:
     )
     st.plotly_chart(fig_top_states, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
