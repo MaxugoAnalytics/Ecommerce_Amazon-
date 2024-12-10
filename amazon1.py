@@ -2,30 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-#######################
-# Page configuration
+# Set page configuration
 st.set_page_config(
-    page_title="Amazon Sales Dashboard",
-    page_icon="🛒",
+    page_title="Amazon Sales Dashboard by Maxwell Adigwe",
     layout="wide",
-    initial_sidebar_state="expanded"
 )
 
-# CSS Styling
+# CSS Styling for Metrics
 st.markdown("""
 <style>
-[data-testid="block-container"] {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    padding-top: 1rem;
-    padding-bottom: 0rem;
-}
-
-[data-testid="stVerticalBlock"] {
-    padding-left: 0rem;
-    padding-right: 0rem;
-}
-
 [data-testid="stMetric"] {
     background-color: #393939;
     text-align: center;
@@ -51,31 +36,54 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-#######################
-# Load data
+# Load and cache data
 @st.cache_data
 def load_data():
     url = 'https://drive.google.com/uc?id=1j-6nn-SvsVlw_ySdMa73dbmaa92ehq-Z'
-    return pd.read_csv(url)
+    amazon = pd.read_csv(url)
+    return amazon
 
+# Load data
 amazon = load_data()
 
-# Add calculated columns
-amazon["Revenue per Order"] = amazon["Order"]
-amazon["Is Weekend"] = amazon["Day"].isin(["Saturday", "Sunday"])
-amazon["Has Promotion"] = amazon["promotion-ids"] != "No Promotion"
+# Centered Title with Styling
+st.markdown("""
+    <style>
+        .centered-title {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: -50px;  /* Adjust if necessary */
+            color: #232F3E;
+        }
+    </style>
+    <div class="centered-title">Amazon Sales Dashboard</div>
+""", unsafe_allow_html=True)
 
-#######################
-# Sidebar
-with st.sidebar:
-    st.title("🛒 Amazon Sales Dashboard")
-    st.markdown("Filter data for analysis:")
-    selected_styles = st.multiselect("Select Product Styles", options=amazon["Style"].unique(), default=amazon["Style"].unique())
-    selected_states = st.multiselect("Select Shipping States", options=amazon["ship-state"].unique(), default=amazon["ship-state"].unique())
-    selected_fulfilment = st.multiselect("Select Fulfilment Type", options=amazon["Fulfilment"].unique(), default=amazon["Fulfilment"].unique())
-    selected_b2b = st.multiselect("Business Type", options=amazon["B2B"].unique(), default=amazon["B2B"].unique())
+# Sidebar filters
+st.sidebar.header("Filters")
+selected_styles = st.sidebar.multiselect(
+    "Select Product Styles",
+    options=amazon["Style"].unique(),
+    default=amazon["Style"].unique()
+)
+selected_states = st.sidebar.multiselect(
+    "Select Shipping States",
+    options=amazon["ship-state"].unique(),
+    default=amazon["ship-state"].unique()
+)
+selected_fulfilment = st.sidebar.multiselect(
+    "Select Fulfilment Type",
+    options=amazon["Fulfilment"].unique(),
+    default=amazon["Fulfilment"].unique()
+)
+selected_b2b = st.sidebar.multiselect(
+    "Business Type",
+    options=amazon["B2B"].unique(),
+    default=amazon["B2B"].unique()
+)
 
-# Filter data
+# Apply filters
 filtered_data = amazon[
     (amazon["Style"].isin(selected_styles)) &
     (amazon["ship-state"].isin(selected_states)) &
@@ -83,31 +91,86 @@ filtered_data = amazon[
     (amazon["B2B"].isin(selected_b2b))
 ]
 
-#######################
-# Dashboard Layout
-col = st.columns((2, 6, 2), gap="medium")
+# Add calculated columns
+filtered_data["Revenue per Order"] = filtered_data["Order"]
+filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
+filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
 
-with col[0]:
-    st.markdown("#### Key Metrics")
-    total_revenue = f"${filtered_data['Revenue per Order'].sum():,.2f}"
-    total_orders = f"{filtered_data['Order'].sum():,.0f}"
-    unique_products = f"{filtered_data['Style'].nunique():,.0f}"
-    states_covered = f"{filtered_data['ship-state'].nunique():,.0f}"
-    promo_usage = f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%"
-    st.metric("Total Revenue", total_revenue)
-    st.metric("Total Orders", total_orders)
-    st.metric("Unique Products", unique_products)
-    st.metric("States Covered", states_covered)
-    st.metric("Promotion Usage", promo_usage)
+# Top Key Metrics
+st.header("Key Metrics")
+metrics = st.columns(5)
+metrics[0].metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
+metrics[1].metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
+metrics[2].metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
+metrics[3].metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
+metrics[4].metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
 
-with col[1]:
-    st.markdown("#### Visual Analysis")
-    st.write("### Revenue by Style")
-    style_revenue = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
-    fig = px.bar(style_revenue, x="Style", y="Revenue per Order", title="Revenue by Product Style", color="Style", text_auto=True)
-    st.plotly_chart(fig, use_container_width=True)
+# Single Row Visualizations
+st.header("Data Visualizations")
+st.markdown("---")
 
-with col[2]:
-    st.markdown("#### Top States by Revenue")
-    state_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].sum().reset_index().sort_values(by="Revenue per Order", ascending=False)
-    st.dataframe(state_revenue)
+# Create columns for all visuals
+cols = st.columns(5)
+
+with cols[0]:
+    # Orders by Fulfilment Type
+    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
+    fig_fulfilment = px.pie(
+        fulfilment_data,
+        names="Fulfilment",
+        values="Order",
+        title="Orders by Fulfilment Type",
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    st.plotly_chart(fig_fulfilment, use_container_width=True)
+
+with cols[1]:
+    # Revenue by Product Style
+    style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
+    fig_style = px.bar(
+        style_data,
+        x="Style",
+        y="Revenue per Order",
+        title="Revenue by Product Style",
+        color="Style",
+        color_discrete_sequence=px.colors.qualitative.Pastel
+    )
+    st.plotly_chart(fig_style, use_container_width=True)
+
+with cols[2]:
+    # Orders by Day
+    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
+    fig_day = px.line(
+        daily_orders,
+        x="Day",
+        y="Order",
+        title="Orders by Day",
+        labels={"Day": "Day", "Order": "Orders"}
+    )
+    st.plotly_chart(fig_day, use_container_width=True)
+
+with cols[3]:
+    # Average Revenue by State
+    state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
+    fig_avg_state = px.bar(
+        state_avg_revenue,
+        x="ship-state",
+        y="Revenue per Order",
+        title="Average Revenue by State",
+        color="ship-state",
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    st.plotly_chart(fig_avg_state, use_container_width=True)
+
+with cols[4]:
+    # B2B vs Consumer Orders
+    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
+    fig_b2b = px.pie(
+        b2b_data,
+        names="B2B",
+        values="Order",
+        title="B2B vs Consumer Orders",
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"]
+    )
+    st.plotly_chart(fig_b2b, use_container_width=True)
+
