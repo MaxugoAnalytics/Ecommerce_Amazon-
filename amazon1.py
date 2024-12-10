@@ -47,7 +47,7 @@ def load_data():
 amazon = load_data()
 
 # Centered Title with Styling
-st.markdown("""
+st.markdown(""" 
     <style>
         .centered-title {
             font-size: 36px;
@@ -78,7 +78,7 @@ selected_fulfilment = st.sidebar.multiselect(
     default=amazon["Fulfilment"].unique()
 )
 selected_b2b = st.sidebar.multiselect(
-    "Business Type",
+    "Select Business Type",
     options=amazon["B2B"].unique(),
     default=amazon["B2B"].unique()
 )
@@ -112,9 +112,15 @@ st.markdown("---")
 # Create columns for all visuals
 cols = st.columns(5)
 
+# Orders by Fulfilment Type
 with cols[0]:
-    # Orders by Fulfilment Type
-    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
+    fulfilment_filter = st.selectbox("Select Fulfilment Type", options=["All"] + list(filtered_data["Fulfilment"].unique()))
+    if fulfilment_filter != "All":
+        fulfilment_data = filtered_data[filtered_data["Fulfilment"] == fulfilment_filter]
+    else:
+        fulfilment_data = filtered_data
+
+    fulfilment_data = fulfilment_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
@@ -124,8 +130,8 @@ with cols[0]:
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
 
+# Revenue by Product Style (no filter applied)
 with cols[1]:
-    # Revenue by Product Style
     style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
     fig_style = px.bar(
         style_data,
@@ -137,9 +143,15 @@ with cols[1]:
     )
     st.plotly_chart(fig_style, use_container_width=True)
 
+# Orders by Day
 with cols[2]:
-    # Orders by Day
-    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
+    day_filter = st.selectbox("Select Day", options=["All"] + list(filtered_data["Day"].unique()))
+    if day_filter != "All":
+        daily_orders = filtered_data[filtered_data["Day"] == day_filter]
+    else:
+        daily_orders = filtered_data
+
+    daily_orders = daily_orders.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
@@ -149,9 +161,15 @@ with cols[2]:
     )
     st.plotly_chart(fig_day, use_container_width=True)
 
+# Average Revenue by State
 with cols[3]:
-    # Average Revenue by State
-    state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
+    state_filter = st.selectbox("Select Shipping State", options=["All"] + list(filtered_data["ship-state"].unique()))
+    if state_filter != "All":
+        state_avg_revenue = filtered_data[filtered_data["ship-state"] == state_filter]
+    else:
+        state_avg_revenue = filtered_data
+
+    state_avg_revenue = state_avg_revenue.groupby("ship-state")["Revenue per Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
         x="ship-state",
@@ -162,9 +180,15 @@ with cols[3]:
     )
     st.plotly_chart(fig_avg_state, use_container_width=True)
 
+# B2B vs Consumer Orders
 with cols[4]:
-    # B2B vs Consumer Orders
-    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
+    b2b_filter = st.selectbox("Select Business Type", options=["All"] + list(filtered_data["B2B"].unique()))
+    if b2b_filter != "All":
+        b2b_data = filtered_data[filtered_data["B2B"] == b2b_filter]
+    else:
+        b2b_data = filtered_data
+
+    b2b_data = b2b_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
         names="B2B",
@@ -173,3 +197,4 @@ with cols[4]:
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
+
