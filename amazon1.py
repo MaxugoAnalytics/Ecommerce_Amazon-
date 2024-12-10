@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# CSS Styling for Metrics
+# CSS Styling for Metrics and Visual Box Frames
 st.markdown("""
 <style>
 [data-testid="stMetric"] {
@@ -32,6 +32,17 @@ st.markdown("""
 
 [data-testid="stMetricDelta"] {
     font-size: 16px;
+}
+
+.visual-box {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-dropdown {
+    margin-bottom: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -135,7 +146,11 @@ with cols[0]:
         title="Orders by Fulfilment Type",
         color_discrete_sequence=px.colors.qualitative.Set3
     )
+    # Place inside a box with filter
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Fulfilment", selected_fulfilment_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_fulfilment, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Revenue by Product Style with filter
 with cols[1]:
@@ -151,7 +166,11 @@ with cols[1]:
         color="Style",
         color_discrete_sequence=px.colors.qualitative.Pastel
     )
+    # Place inside a box with filter
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Product Style", selected_style_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_style, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Orders by Day with filter
 with cols[2]:
@@ -166,7 +185,11 @@ with cols[2]:
         title="Orders by Day",
         labels={"Day": "Day", "Order": "Orders"}
     )
+    # Place inside a box with filter
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Days", selected_day_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_day, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Average Revenue by State with filter
 with cols[3]:
@@ -182,7 +205,11 @@ with cols[3]:
         color="ship-state",
         color_discrete_sequence=px.colors.qualitative.Set3
     )
+    # Place inside a box with filter
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Shipping State", selected_state_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_avg_state, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # B2B vs Consumer Orders with filter
 with cols[4]:
@@ -197,7 +224,12 @@ with cols[4]:
         title="B2B vs Consumer Orders",
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
+    # Place inside a box with filter
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Business Type", selected_b2b_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_b2b, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
