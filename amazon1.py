@@ -8,48 +8,55 @@ st.set_page_config(
     layout="wide",
 )
 
-# CSS Styling for Metrics and Visuals
+# CSS for Power BI Styling
 st.markdown("""
-<style>
-[data-testid="stMetric"] {
-    background-color: #393939;
-    text-align: center;
-    padding: 15px 0;
-    border-radius: 8px;
-}
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
 
-[data-testid="stMetricLabel"] {
-    font-weight: bold;
-    font-size: 14px;
-    color: #f5f5f5;
-}
+        .main-header {
+            background-color: #232F3E;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
 
-[data-testid="stMetricValue"] {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1dbf73;
-}
+        .metric-box, .visual-box {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
 
-[data-testid="stMetricDelta"] {
-    font-size: 16px;
-}
+        .metric-box .metric-title {
+            font-weight: bold;
+            color: #555;
+        }
 
-.visual-box {
-    background-color: #393939;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-    margin: 10px;
-}
+        .metric-box .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #232F3E;
+        }
 
-.visual-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #f5f5f5;
-    text-align: center;
-    margin-bottom: 10px;
-}
-</style>
+        .visual-title {
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            color: #232F3E;
+            margin-bottom: 10px;
+        }
+
+        .dropdown-label {
+            font-weight: bold;
+            color: #232F3E;
+        }
+    </style>
 """, unsafe_allow_html=True)
 
 # Load and cache data
@@ -62,123 +69,120 @@ def load_data():
 # Load data
 amazon = load_data()
 
-# Centered Title with Styling
-st.markdown("""
-    <style>
-        .centered-title {
-            font-size: 36px;
-            font-weight: bold;
-            text-align: center;
-            margin-top: -50px;  /* Adjust if necessary */
-            color: #232F3E;
-        }
-    </style>
-    <div class="centered-title">Amazon Sales Dashboard</div>
-""", unsafe_allow_html=True)
+# Header
+st.markdown('<div class="main-header">Amazon Sales Dashboard</div>', unsafe_allow_html=True)
 
-# Sidebar filters
-st.sidebar.header("Filters")
-selected_styles = st.sidebar.multiselect(
-    "Select Product Styles",
-    options=amazon["Style"].unique(),
-    default=amazon["Style"].unique()
+# Metrics Section
+st.subheader("Key Metrics")
+metrics_row = st.columns(5)
+metrics_row[0].markdown(
+    '<div class="metric-box">'
+    '<div class="metric-title">Total Revenue</div>'
+    f'<div class="metric-value">${amazon["Order"].sum():,.2f}</div>'
+    '</div>',
+    unsafe_allow_html=True
 )
-selected_states = st.sidebar.multiselect(
-    "Select Shipping States",
-    options=amazon["ship-state"].unique(),
-    default=amazon["ship-state"].unique()
+metrics_row[1].markdown(
+    '<div class="metric-box">'
+    '<div class="metric-title">Total Orders</div>'
+    f'<div class="metric-value">{amazon["Order"].sum():,.0f}</div>'
+    '</div>',
+    unsafe_allow_html=True
 )
-selected_fulfilment = st.sidebar.multiselect(
-    "Select Fulfilment Type",
-    options=amazon["Fulfilment"].unique(),
-    default=amazon["Fulfilment"].unique()
+metrics_row[2].markdown(
+    '<div class="metric-box">'
+    '<div class="metric-title">Unique Products</div>'
+    f'<div class="metric-value">{amazon["Style"].nunique():,.0f}</div>'
+    '</div>',
+    unsafe_allow_html=True
 )
-selected_b2b = st.sidebar.multiselect(
-    "Business Type",
-    options=amazon["B2B"].unique(),
-    default=amazon["B2B"].unique()
+metrics_row[3].markdown(
+    '<div class="metric-box">'
+    '<div class="metric-title">States Covered</div>'
+    f'<div class="metric-value">{amazon["ship-state"].nunique():,.0f}</div>'
+    '</div>',
+    unsafe_allow_html=True
+)
+metrics_row[4].markdown(
+    '<div class="metric-box">'
+    '<div class="metric-title">Fulfillment Types</div>'
+    f'<div class="metric-value">{amazon["Fulfilment"].nunique():,.0f}</div>'
+    '</div>',
+    unsafe_allow_html=True
 )
 
-# Apply filters
-filtered_data = amazon[
-    (amazon["Style"].isin(selected_styles)) &
-    (amazon["ship-state"].isin(selected_states)) &
-    (amazon["Fulfilment"].isin(selected_fulfilment)) &
-    (amazon["B2B"].isin(selected_b2b))
-]
-
-# Add calculated columns
-filtered_data["Revenue per Order"] = filtered_data["Order"]
-filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
-filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
-
-# Top Key Metrics
-st.header("Key Metrics")
-metrics = st.columns(5)
-metrics[0].metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
-metrics[1].metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
-metrics[2].metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
-metrics[3].metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
-metrics[4].metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
-
-# Single Row Visualizations
-st.header("Data Visualizations")
-st.markdown("---")
+# Data Visualizations Section
+st.subheader("Data Visualizations")
 
 # Row 1
-row1 = st.columns(3)
+row1 = st.columns(2)
+
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
+
+    fulfilment_filter = st.multiselect(
+        "Select Fulfilment Type",
+        options=["All"] + list(amazon["Fulfilment"].unique()),
+        default="All",
+        key="fulfilment_filter",
+    )
+    filtered_data = amazon if "All" in fulfilment_filter else amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
+
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
         values="Order",
-        color_discrete_sequence=px.colors.qualitative.Set3
+        color_discrete_sequence=px.colors.qualitative.Set3,
+        title=""
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with row1[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
-    style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
-    fig_style = px.bar(
-        style_data,
-        x="Style",
-        y="Revenue per Order",
-        color="Style",
-        color_discrete_sequence=px.colors.qualitative.Pastel
-    )
-    st.plotly_chart(fig_style, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row1[2]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
+
+    day_filter = st.multiselect(
+        "Select Day",
+        options=["All"] + list(amazon["Day"].unique()),
+        default="All",
+        key="day_filter",
+    )
+    filtered_data = amazon if "All" in day_filter else amazon[amazon["Day"].isin(day_filter)]
+
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
         y="Order",
-        labels={"Day": "Day", "Order": "Orders"}
     )
     st.plotly_chart(fig_day, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Row 2
 row2 = st.columns(2)
+
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
-    state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
+
+    state_filter = st.multiselect(
+        "Select Shipping State",
+        options=["All"] + list(amazon["ship-state"].unique()),
+        default="All",
+        key="state_filter",
+    )
+    filtered_data = amazon if "All" in state_filter else amazon[amazon["ship-state"].isin(state_filter)]
+
+    state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
         x="ship-state",
-        y="Revenue per Order",
+        y="Order",
         color="ship-state",
-        color_discrete_sequence=px.colors.qualitative.Set3
+        color_discrete_sequence=px.colors.qualitative.Set3,
     )
     st.plotly_chart(fig_avg_state, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -186,15 +190,25 @@ with row2[0]:
 with row2[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
+
+    b2b_filter = st.multiselect(
+        "Select Business Type",
+        options=["All"] + list(amazon["B2B"].unique()),
+        default="All",
+        key="b2b_filter",
+    )
+    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
+
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
         names="B2B",
         values="Order",
-        color_discrete_sequence=["#1f77b4", "#ff7f0e"]
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"],
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
