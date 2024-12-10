@@ -91,9 +91,9 @@ with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
     
-    # Dropdown filter
-    fulfilment_types = st.selectbox("Select Fulfilment Type:", options=amazon["Fulfilment"].unique(), key="fulfilment_filter")
-    filtered_data = amazon[amazon["Fulfilment"] == fulfilment_types]
+    # Dropdown filter with "All" option
+    fulfilment_types = st.selectbox("Select Fulfilment Type:", options=["All"] + list(amazon["Fulfilment"].unique()), key="fulfilment_filter")
+    filtered_data = amazon if fulfilment_types == "All" else amazon[amazon["Fulfilment"] == fulfilment_types]
     
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
@@ -109,9 +109,9 @@ with row1[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
     
-    # Dropdown filter
-    product_styles = st.selectbox("Select Product Style:", options=amazon["Style"].unique(), key="style_filter")
-    filtered_data = amazon[amazon["Style"] == product_styles]
+    # Dropdown filter with "All" option
+    product_styles = st.selectbox("Select Product Style:", options=["All"] + list(amazon["Style"].unique()), key="style_filter")
+    filtered_data = amazon if product_styles == "All" else amazon[amazon["Style"] == product_styles]
     
     style_data = filtered_data.groupby("Style")["Order"].sum().reset_index()
     fig_style = px.bar(
@@ -128,9 +128,9 @@ with row1[2]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
     
-    # Dropdown filter
-    days = st.selectbox("Select Day:", options=amazon["Day"].unique(), key="day_filter")
-    filtered_data = amazon[amazon["Day"] == days]
+    # Dropdown filter with "All" option
+    days = st.selectbox("Select Day:", options=["All"] + list(amazon["Day"].unique()), key="day_filter")
+    filtered_data = amazon if days == "All" else amazon[amazon["Day"] == days]
     
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
@@ -148,9 +148,9 @@ with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
     
-    # Dropdown filter
-    states = st.selectbox("Select Shipping State:", options=amazon["ship-state"].unique(), key="state_filter")
-    filtered_data = amazon[amazon["ship-state"] == states]
+    # Dropdown filter with "All" option
+    states = st.selectbox("Select Shipping State:", options=["All"] + list(amazon["ship-state"].unique()), key="state_filter")
+    filtered_data = amazon if states == "All" else amazon[amazon["ship-state"] == states]
     
     state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
     fig_avg_state = px.bar(
@@ -167,9 +167,9 @@ with row2[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
     
-    # Dropdown filter
-    b2b_types = st.selectbox("Select Business Type:", options=amazon["B2B"].unique(), key="b2b_filter")
-    filtered_data = amazon[amazon["B2B"] == b2b_types]
+    # Dropdown filter with "All" option
+    b2b_types = st.selectbox("Select Business Type:", options=["All"] + list(amazon["B2B"].unique()), key="b2b_filter")
+    filtered_data = amazon if b2b_types == "All" else amazon[amazon["B2B"] == b2b_types]
     
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
@@ -180,6 +180,7 @@ with row2[1]:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
