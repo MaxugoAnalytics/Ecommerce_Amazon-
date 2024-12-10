@@ -282,5 +282,5 @@ with row3[2]:
         y="Order",
     )
     st.plotly_chart(fig_day, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True
+    st.markdown('</div>', unsafe_allow_html=True)
 
