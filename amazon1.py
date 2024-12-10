@@ -24,15 +24,6 @@ st.markdown("""
             border-radius: 8px;
         }
 
-        .filter-container {
-            background-color: #ffffff;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
         .metric-box, .visual-box {
             background-color: white;
             padding: 15px;
@@ -130,12 +121,13 @@ with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
 
-    fulfilment_filter = st.selectbox(
+    fulfilment_filter = st.multiselect(
         "Select Fulfilment Type",
         options=["All"] + list(amazon["Fulfilment"].unique()),
+        default="All",
         key="fulfilment_filter",
     )
-    filtered_data = amazon if fulfilment_filter == "All" else amazon[amazon["Fulfilment"] == fulfilment_filter]
+    filtered_data = amazon if "All" in fulfilment_filter else amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
 
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
@@ -152,12 +144,13 @@ with row1[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
 
-    product_filter = st.selectbox(
+    product_filter = st.multiselect(
         "Select Product Style",
         options=["All"] + list(amazon["Style"].unique()),
+        default="All",
         key="style_filter",
     )
-    filtered_data = amazon if product_filter == "All" else amazon[amazon["Style"] == product_filter]
+    filtered_data = amazon if "All" in product_filter else amazon[amazon["Style"].isin(product_filter)]
 
     style_data = filtered_data.groupby("Style")["Order"].sum().reset_index()
     fig_style = px.bar(
@@ -174,12 +167,13 @@ with row1[2]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
 
-    day_filter = st.selectbox(
+    day_filter = st.multiselect(
         "Select Day",
         options=["All"] + list(amazon["Day"].unique()),
+        default="All",
         key="day_filter",
     )
-    filtered_data = amazon if day_filter == "All" else amazon[amazon["Day"] == day_filter]
+    filtered_data = amazon if "All" in day_filter else amazon[amazon["Day"].isin(day_filter)]
 
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
@@ -197,12 +191,13 @@ with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
 
-    state_filter = st.selectbox(
+    state_filter = st.multiselect(
         "Select Shipping State",
         options=["All"] + list(amazon["ship-state"].unique()),
+        default="All",
         key="state_filter",
     )
-    filtered_data = amazon if state_filter == "All" else amazon[amazon["ship-state"] == state_filter]
+    filtered_data = amazon if "All" in state_filter else amazon[amazon["ship-state"].isin(state_filter)]
 
     state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
     fig_avg_state = px.bar(
@@ -219,12 +214,13 @@ with row2[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
 
-    b2b_filter = st.selectbox(
+    b2b_filter = st.multiselect(
         "Select Business Type",
         options=["All"] + list(amazon["B2B"].unique()),
+        default="All",
         key="b2b_filter",
     )
-    filtered_data = amazon if b2b_filter == "All" else amazon[amazon["B2B"] == b2b_filter]
+    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
 
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
@@ -235,6 +231,7 @@ with row2[1]:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
