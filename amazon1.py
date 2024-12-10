@@ -34,11 +34,20 @@ st.markdown("""
     font-size: 16px;
 }
 
-.styled-chart {
+.visual-box {
     background-color: #393939;
-    padding: 10px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.visual-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #f5f5f5;
+    text-align: center;
+    margin-bottom: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -119,27 +128,28 @@ st.markdown("---")
 # Create columns for all visuals
 cols = st.columns(5)
 
+# Add styled containers for visuals
 with cols[0]:
-    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
         values="Order",
-        title="Orders by Fulfilment Type",
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[1]:
-    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
     style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
     fig_style = px.bar(
         style_data,
         x="Style",
         y="Revenue per Order",
-        title="Revenue by Product Style",
         color="Style",
         color_discrete_sequence=px.colors.qualitative.Pastel
     )
@@ -147,16 +157,45 @@ with cols[1]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[2]:
-    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
         y="Order",
-        title="Orders by Day",
         labels={"Day": "Day", "Order": "Orders"}
     )
     st.plotly_chart(fig_day, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with cols[3]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
+    state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
+    fig_avg_state = px.bar(
+        state_avg_revenue,
+        x="ship-state",
+        y="Revenue per Order",
+        color="ship-state",
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    st.plotly_chart(fig_avg_state, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with cols[4]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
+    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
+    fig_b2b = px.pie(
+        b2b_data,
+        names="B2B",
+        values="Order",
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"]
+    )
+    st.plotly_chart(fig_b2b, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[3]:
