@@ -72,41 +72,50 @@ amazon = load_data()
 # Header
 st.markdown('<div class="main-header">Amazon Sales Dashboard</div>', unsafe_allow_html=True)
 
-# Sidebar Filters
-st.sidebar.header("Filters")
-fulfilment_filter = st.sidebar.multiselect(
+# Filters Section
+st.subheader("Filters")
+fulfilment_filter = st.multiselect(
     "Select Fulfilment Type",
-    options=amazon["Fulfilment"].unique(),
-    default=amazon["Fulfilment"].unique()
+    options=["All"] + list(amazon["Fulfilment"].unique()),
+    default=["All"],
+    key="fulfilment_filter",
 )
-style_filter = st.sidebar.multiselect(
+
+style_filter = st.multiselect(
     "Select Product Style",
-    options=amazon["Style"].unique(),
-    default=amazon["Style"].unique()
+    options=["All"] + list(amazon["Style"].unique()),
+    default=["All"],
+    key="style_filter",
 )
-day_filter = st.sidebar.multiselect(
+
+day_filter = st.multiselect(
     "Select Day",
-    options=amazon["Day"].unique(),
-    default=amazon["Day"].unique()
+    options=["All"] + list(amazon["Day"].unique()),
+    default=["All"],
+    key="day_filter",
 )
-state_filter = st.sidebar.multiselect(
+
+state_filter = st.multiselect(
     "Select Shipping State",
-    options=amazon["ship-state"].unique(),
-    default=amazon["ship-state"].unique()
+    options=["All"] + list(amazon["ship-state"].unique()),
+    default=["All"],
+    key="state_filter",
 )
-b2b_filter = st.sidebar.multiselect(
+
+b2b_filter = st.multiselect(
     "Select Business Type",
-    options=amazon["B2B"].unique(),
-    default=amazon["B2B"].unique()
+    options=["All"] + list(amazon["B2B"].unique()),
+    default=["All"],
+    key="b2b_filter",
 )
 
 # Apply Filters
 filtered_data = amazon[
-    (amazon["Fulfilment"].isin(fulfilment_filter)) &
-    (amazon["Style"].isin(style_filter)) &
-    (amazon["Day"].isin(day_filter)) &
-    (amazon["ship-state"].isin(state_filter)) &
-    (amazon["B2B"].isin(b2b_filter))
+    (amazon["Fulfilment"].isin(fulfilment_filter) if "All" not in fulfilment_filter else True) &
+    (amazon["Style"].isin(style_filter) if "All" not in style_filter else True) &
+    (amazon["Day"].isin(day_filter) if "All" not in day_filter else True) &
+    (amazon["ship-state"].isin(state_filter) if "All" not in state_filter else True) &
+    (amazon["B2B"].isin(b2b_filter) if "All" not in b2b_filter else True)
 ]
 
 # Metrics Section
@@ -122,7 +131,7 @@ metrics_row[0].markdown(
 metrics_row[1].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Total Orders</div>'
-    f'<div class="metric-value">{filtered_data["Order"].count():,.0f}</div>'
+    f'<div class="metric-value">{filtered_data["Order"].sum():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
@@ -152,7 +161,7 @@ metrics_row[4].markdown(
 st.subheader("Data Visualizations")
 
 # Row 1
-row1 = st.columns(2)
+row1 = st.columns(3)
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -163,12 +172,28 @@ with row1[0]:
         fulfilment_data,
         names="Fulfilment",
         values="Order",
-        color_discrete_sequence=px.colors.qualitative.Set3
+        color_discrete_sequence=px.colors.qualitative.Set3,
+        title=""
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with row1[1]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
+
+    style_data = filtered_data.groupby("Style")["Order"].sum().reset_index()
+    fig_style = px.bar(
+        style_data,
+        x="Style",
+        y="Order",
+        color="Style",
+        color_discrete_sequence=px.colors.qualitative.Pastel,
+    )
+    st.plotly_chart(fig_style, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with row1[2]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
 
@@ -176,7 +201,7 @@ with row1[1]:
     fig_day = px.line(
         daily_orders,
         x="Day",
-        y="Order"
+        y="Order",
     )
     st.plotly_chart(fig_day, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -194,7 +219,7 @@ with row2[0]:
         x="ship-state",
         y="Order",
         color="ship-state",
-        color_discrete_sequence=px.colors.qualitative.Set3
+        color_discrete_sequence=px.colors.qualitative.Set3,
     )
     st.plotly_chart(fig_avg_state, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -208,8 +233,9 @@ with row2[1]:
         b2b_data,
         names="B2B",
         values="Order",
-        color_discrete_sequence=["#1f77b4", "#ff7f0e"]
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"],
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
