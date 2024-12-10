@@ -4,10 +4,11 @@ import plotly.express as px
 
 # Set page configuration
 st.set_page_config(
-    page_title="Amazon Sales Dashboard",
+    page_title="Amazon Sales Dashboard by Maxwell Adigwe",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+st.markdown('<style>div.block-container{padding-top:1rem;}<style>,', unsafe_allow_html= True)
 
 # Load and cache data
 @st.cache_data
@@ -63,6 +64,7 @@ filtered_data = amazon[(
 filtered_data["Revenue per Order"] = filtered_data["Order"]  # Assuming 'Order' is revenue in this dataset
 filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
 filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
+
 
 # Layout: Top Metrics
 st.header("Key Metrics")
@@ -165,17 +167,20 @@ with col6:
     st.plotly_chart(fig_hist, use_container_width=True)
 
 with col7:
-    st.subheader("Monthly Orders Trend")
-    monthly_orders = filtered_data.groupby("Month")["Order"].sum().reset_index()
-    fig_month = px.line(
-    monthly_orders,
-    x="Month",
-    y="Order",
-    title="Monthly Orders Trend",
-    labels={"Month": "Month", "Order": "Total Orders"}
-    )
-    st.plotly_chart(fig_month, use_container_width=True)
-
+    # Sales Channel Distribution (Bar Chart)
+    st.subheader("Sales Channel Distribution")
+    if "Sales Channel" in filtered_data.columns:  # Avoid errors if the column is missing
+        sales_channel_data = filtered_data.groupby("Sales Channel")["Order"].sum().reset_index()
+        fig_sales_channel = px.bar(
+            sales_channel_data,
+            x="Sales Channel",
+            y="Order",
+            title="Orders by Sales Channel",
+            labels={"Sales Channel": "Channel", "Order": "Total Orders"},
+            color="Sales Channel",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        st.plotly_chart(fig_sales_channel, use_container_width=True)
 
 with col8:
     # Revenue vs Orders Scatter Plot
