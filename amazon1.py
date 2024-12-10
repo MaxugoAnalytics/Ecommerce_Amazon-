@@ -123,11 +123,11 @@ with row1[0]:
 
     fulfilment_filter = st.multiselect(
         "Select Fulfilment Type",
-        options=["All"] + list(amazon["Fulfilment"].unique()),
-        default="All",
+        options=list(amazon["Fulfilment"].unique()),
+        default=list(amazon["Fulfilment"].unique()),
         key="fulfilment_filter",
     )
-    filtered_data = amazon if "All" in fulfilment_filter else amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
+    filtered_data = amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
 
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
@@ -146,11 +146,11 @@ with row1[1]:
 
     day_filter = st.multiselect(
         "Select Day",
-        options=["All"] + list(amazon["Day"].unique()),
-        default="All",
+        options=list(amazon["Day"].unique()),
+        default=list(amazon["Day"].unique()),
         key="day_filter",
     )
-    filtered_data = amazon if "All" in day_filter else amazon[amazon["Day"].isin(day_filter)]
+    filtered_data = amazon[amazon["Day"].isin(day_filter)]
 
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
@@ -168,13 +168,12 @@ with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
 
-    state_filter = st.multiselect(
+    state_filter = st.selectbox(
         "Select Shipping State",
         options=["All"] + list(amazon["ship-state"].unique()),
-        default="All",
         key="state_filter",
     )
-    filtered_data = amazon if "All" in state_filter else amazon[amazon["ship-state"].isin(state_filter)]
+    filtered_data = amazon if state_filter == "All" else amazon[amazon["ship-state"] == state_filter]
 
     state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
     fig_avg_state = px.bar(
@@ -193,11 +192,11 @@ with row2[1]:
 
     b2b_filter = st.multiselect(
         "Select Business Type",
-        options=["All"] + list(amazon["B2B"].unique()),
-        default="All",
+        options=list(amazon["B2B"].unique()),
+        default=list(amazon["B2B"].unique()),
         key="b2b_filter",
     )
-    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
+    filtered_data = amazon[amazon["B2B"].isin(b2b_filter)]
 
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
@@ -208,6 +207,7 @@ with row2[1]:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
