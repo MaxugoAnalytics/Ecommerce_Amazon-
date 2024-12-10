@@ -18,21 +18,19 @@ def load_data():
 # Load data
 amazon = load_data()
 
-# Header section
+# Centered Title with Styling
 st.markdown("""
     <style>
-        .main-header {
+        .centered-title {
             font-size: 36px;
             font-weight: bold;
+            text-align: center;
+            margin-top: -50px;  /* Adjust if necessary */
             color: #232F3E;
         }
-        .sidebar .sidebar-content {
-            background-color: #F3F4F6;
-        }
     </style>
+    <div class="centered-title">Amazon Sales Dashboard</div>
 """, unsafe_allow_html=True)
-
-st.markdown("<div class='main-header'>Amazon Sales Dashboard</div>", unsafe_allow_html=True)
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -164,6 +162,7 @@ with row2_col3:
         color_discrete_sequence=px.colors.qualitative.Pastel1
     )
     st.plotly_chart(fig_fulfilment_revenue, use_container_width=True)
+
 
 
 
