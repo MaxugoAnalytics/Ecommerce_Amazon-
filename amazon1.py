@@ -279,4 +279,8 @@ with visuals_row:
             names="B2B",
             values="Order",
             color_discrete_sequence=["#1f77b4", "#ff7f0e"],
-       
+        )
+        st.plotly_chart(fig_b2b, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
