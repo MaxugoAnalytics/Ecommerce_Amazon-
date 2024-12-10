@@ -60,13 +60,8 @@ st.markdown("""
     <div class="centered-title">Amazon Sales Dashboard</div>
 """, unsafe_allow_html=True)
 
-# Sidebar filters
+# Sidebar filters (Removed the "Product Styles" filter)
 st.sidebar.header("Filters")
-selected_styles = st.sidebar.multiselect(
-    "Select Product Styles",
-    options=amazon["Style"].unique(),
-    default=amazon["Style"].unique()
-)
 selected_states = st.sidebar.multiselect(
     "Select Shipping States",
     options=amazon["ship-state"].unique(),
@@ -85,7 +80,6 @@ selected_b2b = st.sidebar.multiselect(
 
 # Apply filters
 filtered_data = amazon[
-    (amazon["Style"].isin(selected_styles)) &
     (amazon["ship-state"].isin(selected_states)) &
     (amazon["Fulfilment"].isin(selected_fulfilment)) &
     (amazon["B2B"].isin(selected_b2b))
@@ -197,4 +191,5 @@ with cols[4]:
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
+
 
