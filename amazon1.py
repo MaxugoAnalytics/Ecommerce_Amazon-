@@ -31,8 +31,6 @@ st.markdown("""
             border: 1px solid #e0e0e0;
             box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            margin-bottom: 20px;
-            height: 100%;
         }
 
         .metric-box .metric-title {
@@ -63,11 +61,13 @@ st.markdown("""
         .row {
             display: flex;
             justify-content: space-between;
+            margin-top: 10px;
         }
 
         .col {
             width: 30%;
             padding: 10px;
+            margin: 5px;
         }
 
         .metric-row {
@@ -76,8 +76,18 @@ st.markdown("""
             margin-bottom: 20px;
         }
 
+        /* Container for the visuals */
+        .visual-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        /* Adjust height of visual boxes */
         .visual-box {
             height: 300px;
+            min-width: 300px;
         }
 
     </style>
@@ -191,7 +201,7 @@ st.subheader("Data Visualizations")
 visuals_row = st.container()
 
 with visuals_row:
-    st.markdown('<div class="row">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-container">', unsafe_allow_html=True)
     
     # Visual 1: Orders by Fulfilment Type
     col1, col2, col3 = st.columns(3)
@@ -240,7 +250,7 @@ with visuals_row:
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Row 2
-    st.markdown('<div class="row">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-container">', unsafe_allow_html=True)
 
     # Visual 4: Average Revenue by State
     col1, col2 = st.columns(2)
@@ -269,14 +279,4 @@ with visuals_row:
             names="B2B",
             values="Order",
             color_discrete_sequence=["#1f77b4", "#ff7f0e"],
-        )
-        st.plotly_chart(fig_b2b, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
-
+       
