@@ -82,9 +82,6 @@ metrics[3].metric("States Covered", f"{amazon['ship-state'].nunique():,.0f}")
 metrics[4].metric("Fulfillment Types", f"{amazon['Fulfilment'].nunique():,.0f}")
 
 # Data Visualizations
-st.header("Data Visualizations")
-st.markdown("---")
-
 # Row 1
 row1 = st.columns(3)
 with row1[0]:
