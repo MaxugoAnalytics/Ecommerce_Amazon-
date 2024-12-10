@@ -46,10 +46,10 @@ st.markdown("""
 
         .visual-title {
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;  /* Smaller title font size */
             text-align: center;
             color: #232F3E;
-            margin-bottom: 10px;
+            margin-bottom: 5px;  /* Reduced space between title and chart */
         }
 
         .dropdown-label {
@@ -114,8 +114,8 @@ metrics_row[4].markdown(
 # Data Visualizations Section
 st.subheader("Data Visualizations")
 
-# Row 1 (Three Columns with Reduced Widths)
-row1 = st.columns([0.5, 0.5, 0.5])  # Reduced widths
+# Row 1 (Three Columns with Further Reduced Widths)
+row1 = st.columns([0.2, 0.2, 0.2])  # Reduced widths further
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -183,8 +183,8 @@ with row1[2]:
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 2 (Three Columns with Reduced Widths)
-row2 = st.columns([0.5, 0.5, 0.5])  # Reduced widths
+# Row 2 (Three Columns with Further Reduced Widths)
+row2 = st.columns([0.2, 0.2, 0.2])  # Reduced widths further
 
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -239,48 +239,4 @@ with row2[2]:
     st.plotly_chart(fig_top_states, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 3 (Three Columns with Reduced Widths)
-row3 = st.columns([0.5, 0.5, 0.5])  # Reduced widths
-
-with row3[0]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
-
-    fulfilment_data = amazon.groupby("Fulfilment")["Order"].sum().reset_index()
-    fig_fulfilment = px.pie(
-        fulfilment_data,
-        names="Fulfilment",
-        values="Order",
-        color_discrete_sequence=px.colors.qualitative.Set3,
-    )
-    st.plotly_chart(fig_fulfilment, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row3[1]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Orders by Style</div>', unsafe_allow_html=True)
-
-    style_data = amazon.groupby("Style")["Order"].sum().reset_index()
-    fig_style = px.bar(
-        style_data,
-        x="Style",
-        y="Order",
-        color="Style",
-        color_discrete_sequence=px.colors.qualitative.Set3,
-    )
-    st.plotly_chart(fig_style, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row3[2]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
-
-    daily_orders = amazon.groupby("Day")["Order"].sum().reset_index()
-    fig_day = px.line(
-        daily_orders,
-        x="Day",
-        y="Order",
-    )
-    st.plotly_chart(fig_day, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
