@@ -115,7 +115,7 @@ metrics_row[4].markdown(
 st.subheader("Data Visualizations")
 
 # Row 1
-row1 = st.columns(3)
+row1 = st.columns(2)
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -141,29 +141,6 @@ with row1[0]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with row1[1]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
-
-    product_filter = st.multiselect(
-        "Select Product Style",
-        options=["All"] + list(amazon["Style"].unique()),
-        default="All",
-        key="style_filter",
-    )
-    filtered_data = amazon if "All" in product_filter else amazon[amazon["Style"].isin(product_filter)]
-
-    style_data = filtered_data.groupby("Style")["Order"].sum().reset_index()
-    fig_style = px.bar(
-        style_data,
-        x="Style",
-        y="Order",
-        color="Style",
-        color_discrete_sequence=px.colors.qualitative.Pastel,
-    )
-    st.plotly_chart(fig_style, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row1[2]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
 
@@ -231,6 +208,7 @@ with row2[1]:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
