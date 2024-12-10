@@ -115,7 +115,7 @@ metrics_row[4].markdown(
 st.subheader("Data Visualizations")
 
 # Row 1 (Three Columns with Reduced Widths)
-row1 = st.columns([2, 2, 2])  # Reduced widths
+row1 = st.columns([0.5, 0.5, 0.5])  # Reduced widths
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -184,7 +184,7 @@ with row1[2]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Row 2 (Three Columns with Reduced Widths)
-row2 = st.columns([2, 2, 2])  # Reduced widths
+row2 = st.columns([0.5, 0.5, 0.5])  # Reduced widths
 
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -240,7 +240,7 @@ with row2[2]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Row 3 (Three Columns with Reduced Widths)
-row3 = st.columns([2, 2, 2])  # Reduced widths
+row3 = st.columns([0.5, 0.5, 0.5])  # Reduced widths
 
 with row3[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -282,5 +282,5 @@ with row3[2]:
         y="Order",
     )
     st.plotly_chart(fig_day, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True
 
