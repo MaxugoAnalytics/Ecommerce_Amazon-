@@ -69,23 +69,22 @@ filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
 filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
 
 # Top Key Metrics
-top_row = st.columns(7)
+st.header("Key Metrics")
+top_row = st.columns(5)
 top_row[0].metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
 top_row[1].metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
 top_row[2].metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
 top_row[3].metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
 top_row[4].metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
-top_row[5].metric("Avg Revenue/Order", f"${filtered_data['Revenue per Order'].mean():,.2f}")
-top_row[6].metric("Weekend Orders", f"{filtered_data['Is Weekend'].sum():,.0f}")
 
-# Layout: Visualizations
+# Single Row Visualizations
 st.header("Data Visualizations")
 st.markdown("---")
 
-# Row 1
-row1_col1, row1_col2, row1_col3 = st.columns(3)
+# Create columns for all visuals
+cols = st.columns(5)
 
-with row1_col1:
+with cols[0]:
     # Orders by Fulfilment Type
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
@@ -97,7 +96,7 @@ with row1_col1:
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
 
-with row1_col2:
+with cols[1]:
     # Revenue by Product Style
     style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
     fig_style = px.bar(
@@ -110,7 +109,7 @@ with row1_col2:
     )
     st.plotly_chart(fig_style, use_container_width=True)
 
-with row1_col3:
+with cols[2]:
     # Orders by Day
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
@@ -122,10 +121,7 @@ with row1_col3:
     )
     st.plotly_chart(fig_day, use_container_width=True)
 
-# Row 2
-row2_col1, row2_col2, row2_col3 = st.columns(3)
-
-with row2_col1:
+with cols[3]:
     # Average Revenue by State
     state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
     fig_avg_state = px.bar(
@@ -138,8 +134,8 @@ with row2_col1:
     )
     st.plotly_chart(fig_avg_state, use_container_width=True)
 
-with row2_col2:
-    # B2B Orders
+with cols[4]:
+    # B2B vs Consumer Orders
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
@@ -150,18 +146,6 @@ with row2_col2:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
 
-with row2_col3:
-    # Revenue vs Fulfilment Type
-    fulfilment_revenue = filtered_data.groupby("Fulfilment")["Revenue per Order"].sum().reset_index()
-    fig_fulfilment_revenue = px.bar(
-        fulfilment_revenue,
-        x="Fulfilment",
-        y="Revenue per Order",
-        title="Revenue vs Fulfilment Type",
-        color="Fulfilment",
-        color_discrete_sequence=px.colors.qualitative.Pastel1
-    )
-    st.plotly_chart(fig_fulfilment_revenue, use_container_width=True)
 
 
 
