@@ -70,17 +70,15 @@ filtered_data["Revenue per Order"] = filtered_data["Order"]
 filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
 filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
 
-# Key metrics
-st.header("Key Metrics")
-st.markdown("---")
-col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
-col1.metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
-col2.metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
-col3.metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
-col4.metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
-col5.metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
-col6.metric("Avg Revenue/Order", f"${filtered_data['Revenue per Order'].mean():,.2f}")
-col7.metric("Weekend Orders", f"{filtered_data['Is Weekend'].sum():,.0f}")
+# Top Key Metrics
+top_row = st.columns(7)
+top_row[0].metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
+top_row[1].metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
+top_row[2].metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
+top_row[3].metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
+top_row[4].metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
+top_row[5].metric("Avg Revenue/Order", f"${filtered_data['Revenue per Order'].mean():,.2f}")
+top_row[6].metric("Weekend Orders", f"{filtered_data['Is Weekend'].sum():,.0f}")
 
 # Layout: Visualizations
 st.header("Data Visualizations")
@@ -167,30 +165,6 @@ with row2_col3:
     )
     st.plotly_chart(fig_fulfilment_revenue, use_container_width=True)
 
-# Row 3
-row3_col1, row3_col2 = st.columns(2)
-
-with row3_col1:
-    # Revenue Distribution
-    fig_hist = px.histogram(
-        filtered_data,
-        x="Revenue per Order",
-        title="Revenue Distribution",
-        color_discrete_sequence=["#636EFA"]
-    )
-    st.plotly_chart(fig_hist, use_container_width=True)
-
-with row3_col2:
-    # Revenue vs Orders Scatter Plot
-    fig_revenue_orders = px.scatter(
-        filtered_data,
-        x="Order",
-        y="Revenue per Order",
-        color="Style",
-        title="Revenue vs Orders",
-        labels={"Order": "Orders", "Revenue per Order": "Revenue"}
-    )
-    st.plotly_chart(fig_revenue_orders, use_container_width=True)
 
 
 
