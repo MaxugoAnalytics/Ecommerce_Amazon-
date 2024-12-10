@@ -114,8 +114,8 @@ metrics_row[4].markdown(
 # Data Visualizations Section
 st.subheader("Data Visualizations")
 
-# Row 1
-row1 = st.columns(2)
+# Row 1 (Three Columns)
+row1 = st.columns(3)
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -161,8 +161,30 @@ with row1[1]:
     st.plotly_chart(fig_day, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 2
-row2 = st.columns(2)
+with row1[2]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
+
+    b2b_filter = st.multiselect(
+        "Select Business Type",
+        options=["All"] + list(amazon["B2B"].unique()),
+        default="All",
+        key="b2b_filter",
+    )
+    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
+
+    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
+    fig_b2b = px.pie(
+        b2b_data,
+        names="B2B",
+        values="Order",
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"],
+    )
+    st.plotly_chart(fig_b2b, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Row 2 (Three Columns)
+row2 = st.columns(3)
 
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -189,40 +211,76 @@ with row2[0]:
 
 with row2[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Orders by Product Category</div>', unsafe_allow_html=True)
 
-    b2b_filter = st.multiselect(
-        "Select Business Type",
-        options=["All"] + list(amazon["B2B"].unique()),
-        default="All",
-        key="b2b_filter",
+    category_data = filtered_data.groupby("Category")["Order"].sum().reset_index()
+    fig_category = px.bar(
+        category_data,
+        x="Category",
+        y="Order",
+        color="Category",
+        color_discrete_sequence=px.colors.qualitative.Set3,
     )
-    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
-
-    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
-    fig_b2b = px.pie(
-        b2b_data,
-        names="B2B",
-        values="Order",
-        color_discrete_sequence=["#1f77b4", "#ff7f0e"],
-    )
-    st.plotly_chart(fig_b2b, use_container_width=True)
+    st.plotly_chart(fig_category, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+with row2[2]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Top 10 States by Revenue</div>', unsafe_allow_html=True)
 
+    top_states = filtered_data.groupby("ship-state")["Order"].sum().reset_index().nlargest(10, "Order")
+    fig_top_states = px.bar(
+        top_states,
+        x="ship-state",
+        y="Order",
+        color="ship-state",
+        color_discrete_sequence=px.colors.qualitative.Set3,
+    )
+    st.plotly_chart(fig_top_states, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
+# Row 3 (Three Columns)
+row3 = st.columns(3)
 
+with row3[0]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
 
+    fulfilment_data = amazon.groupby("Fulfilment")["Order"].sum().reset_index()
+    fig_fulfilment = px.pie(
+        fulfilment_data,
+        names="Fulfilment",
+        values="Order",
+        color_discrete_sequence=px.colors.qualitative.Set3,
+    )
+    st.plotly_chart(fig_fulfilment, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
+with row3[1]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Orders by Style</div>', unsafe_allow_html=True)
 
+    style_data = amazon.groupby("Style")["Order"].sum().reset_index()
+    fig_style = px.bar(
+        style_data,
+        x="Style",
+        y="Order",
+        color="Style",
+        color_discrete_sequence=px.colors.qualitative.Set3,
+    )
+    st.plotly_chart(fig_style, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
+with row3[2]:
+    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
+    st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
 
-
-
-
-
-
-
-
-
+    daily_orders = amazon.groupby("Day")["Order"].sum().reset_index()
+    fig_day = px.line(
+        daily_orders,
+        x="Day",
+        y="Order",
+    )
+    st.plotly_chart(fig_day, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
