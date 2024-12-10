@@ -114,8 +114,8 @@ metrics_row[4].markdown(
 # Data Visualizations Section
 st.subheader("Data Visualizations")
 
-# Row 1 (Three Columns)
-row1 = st.columns(3)
+# Row 1 (Three Columns with Reduced Widths)
+row1 = st.columns([2, 2, 2])  # Reduced widths
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -183,8 +183,8 @@ with row1[2]:
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 2 (Three Columns)
-row2 = st.columns(3)
+# Row 2 (Three Columns with Reduced Widths)
+row2 = st.columns([2, 2, 2])  # Reduced widths
 
 with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
@@ -239,8 +239,8 @@ with row2[2]:
     st.plotly_chart(fig_top_states, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 3 (Three Columns)
-row3 = st.columns(3)
+# Row 3 (Three Columns with Reduced Widths)
+row3 = st.columns([2, 2, 2])  # Reduced widths
 
 with row3[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
