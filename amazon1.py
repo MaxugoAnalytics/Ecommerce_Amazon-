@@ -8,45 +8,6 @@ st.set_page_config(
     layout="wide",
 )
 
-# CSS Styling for Metrics and Visual Box Frames
-st.markdown("""
-<style>
-[data-testid="stMetric"] {
-    background-color: #393939;
-    text-align: center;
-    padding: 15px 0;
-    border-radius: 8px;
-}
-
-[data-testid="stMetricLabel"] {
-    font-weight: bold;
-    font-size: 14px;
-    color: #f5f5f5;
-}
-
-[data-testid="stMetricValue"] {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1dbf73;
-}
-
-[data-testid="stMetricDelta"] {
-    font-size: 16px;
-}
-
-.visual-box {
-    background-color: #f5f5f5;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.filter-dropdown {
-    margin-bottom: 15px;
-}
-</style>
-""", unsafe_allow_html=True)
-
 # Load and cache data
 @st.cache_data
 def load_data():
@@ -57,59 +18,51 @@ def load_data():
 # Load data
 amazon = load_data()
 
-# Centered Title with Styling
-st.markdown(""" 
+# Header section
+st.markdown("""
     <style>
-        .centered-title {
+        .main-header {
             font-size: 36px;
             font-weight: bold;
-            text-align: center;
-            margin-top: -50px;  /* Adjust if necessary */
             color: #232F3E;
         }
+        .sidebar .sidebar-content {
+            background-color: #F3F4F6;
+        }
     </style>
-    <div class="centered-title">Amazon Sales Dashboard</div>
 """, unsafe_allow_html=True)
 
-# Sidebar filters (Multi-select options with "All" option)
-st.sidebar.header("Filters")
+st.markdown("<div class='main-header'>Amazon Sales Dashboard</div>", unsafe_allow_html=True)
 
-# Function to add an "All" option to multiselect
-def add_all_option(filter_name, options, default_value):
-    # Add the 'All' option to the list
-    all_option = ["All"] + list(options)
-    selected_values = st.sidebar.multiselect(
-        filter_name,
-        options=all_option,
-        default=default_value
-    )
-    
-    # If 'All' is selected, return all options
-    if "All" in selected_values:
-        return options
-    else:
-        return selected_values
+# Sidebar filters
+st.sidebar.header("Filters")
+selected_styles = st.sidebar.multiselect(
+    "Select Product Styles",
+    options=amazon["Style"].unique(),
+    default=amazon["Style"].unique()
+)
+selected_states = st.sidebar.multiselect(
+    "Select Shipping States",
+    options=amazon["ship-state"].unique(),
+    default=amazon["ship-state"].unique()
+)
+selected_fulfilment = st.sidebar.multiselect(
+    "Select Fulfilment Type",
+    options=amazon["Fulfilment"].unique(),
+    default=amazon["Fulfilment"].unique()
+)
+selected_b2b = st.sidebar.multiselect(
+    "Business Type",
+    options=amazon["B2B"].unique(),
+    default=amazon["B2B"].unique()
+)
 
 # Apply filters
-selected_states = add_all_option(
-    "Select Shipping States", amazon["ship-state"].unique(), amazon["ship-state"].unique()
-)
-selected_fulfilment = add_all_option(
-    "Select Fulfilment Type", amazon["Fulfilment"].unique(), amazon["Fulfilment"].unique()
-)
-selected_b2b = add_all_option(
-    "Select Business Type", amazon["B2B"].unique(), amazon["B2B"].unique()
-)
-selected_days = add_all_option(
-    "Select Days", amazon["Day"].unique(), amazon["Day"].unique()
-)
-
-# Apply filters to the data
 filtered_data = amazon[
+    (amazon["Style"].isin(selected_styles)) &
     (amazon["ship-state"].isin(selected_states)) &
     (amazon["Fulfilment"].isin(selected_fulfilment)) &
-    (amazon["B2B"].isin(selected_b2b)) &
-    (amazon["Day"].isin(selected_days))
+    (amazon["B2B"].isin(selected_b2b))
 ]
 
 # Add calculated columns
@@ -117,28 +70,28 @@ filtered_data["Revenue per Order"] = filtered_data["Order"]
 filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
 filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
 
-# Top Key Metrics
+# Key metrics
 st.header("Key Metrics")
-metrics = st.columns(5)
-metrics[0].metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
-metrics[1].metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
-metrics[2].metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
-metrics[3].metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
-metrics[4].metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
+st.markdown("---")
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+col1.metric("Total Revenue", f"${filtered_data['Revenue per Order'].sum():,.2f}")
+col2.metric("Total Orders", f"{filtered_data['Order'].sum():,.0f}")
+col3.metric("Unique Products", f"{filtered_data['Style'].nunique():,.0f}")
+col4.metric("States Covered", f"{filtered_data['ship-state'].nunique():,.0f}")
+col5.metric("Promotion Usage (%)", f"{(filtered_data['Has Promotion'].mean() * 100):.2f}%")
+col6.metric("Avg Revenue/Order", f"${filtered_data['Revenue per Order'].mean():,.2f}")
+col7.metric("Weekend Orders", f"{filtered_data['Is Weekend'].sum():,.0f}")
 
-# Single Row Visualizations
+# Layout: Visualizations
 st.header("Data Visualizations")
 st.markdown("---")
 
-# Create columns for all visuals
-cols = st.columns(5)
+# Row 1
+row1_col1, row1_col2, row1_col3 = st.columns(3)
 
-# Orders by Fulfilment Type with filter
-with cols[0]:
-    selected_fulfilment_visual = add_all_option(
-        "Select Fulfilment Type for Visual", filtered_data["Fulfilment"].unique(), filtered_data["Fulfilment"].unique()
-    )
-    fulfilment_data = filtered_data[filtered_data["Fulfilment"].isin(selected_fulfilment_visual)].groupby("Fulfilment")["Order"].sum().reset_index()
+with row1_col1:
+    # Orders by Fulfilment Type
+    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
@@ -146,18 +99,11 @@ with cols[0]:
         title="Orders by Fulfilment Type",
         color_discrete_sequence=px.colors.qualitative.Set3
     )
-    # Place inside a box with filter
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Fulfilment", selected_fulfilment_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_fulfilment, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# Revenue by Product Style with filter
-with cols[1]:
-    selected_style_visual = add_all_option(
-        "Select Product Style for Visual", filtered_data["Style"].unique(), filtered_data["Style"].unique()
-    )
-    style_data = filtered_data[filtered_data["Style"].isin(selected_style_visual)].groupby("Style")["Revenue per Order"].sum().reset_index()
+with row1_col2:
+    # Revenue by Product Style
+    style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
     fig_style = px.bar(
         style_data,
         x="Style",
@@ -166,18 +112,11 @@ with cols[1]:
         color="Style",
         color_discrete_sequence=px.colors.qualitative.Pastel
     )
-    # Place inside a box with filter
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Product Style", selected_style_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_style, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# Orders by Day with filter
-with cols[2]:
-    selected_day_visual = add_all_option(
-        "Select Days for Visual", filtered_data["Day"].unique(), filtered_data["Day"].unique()
-    )
-    daily_orders = filtered_data[filtered_data["Day"].isin(selected_day_visual)].groupby("Day")["Order"].sum().reset_index()
+with row1_col3:
+    # Orders by Day
+    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
@@ -185,18 +124,14 @@ with cols[2]:
         title="Orders by Day",
         labels={"Day": "Day", "Order": "Orders"}
     )
-    # Place inside a box with filter
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Days", selected_day_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_day, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# Average Revenue by State with filter
-with cols[3]:
-    selected_state_visual = add_all_option(
-        "Select Shipping States for Visual", filtered_data["ship-state"].unique(), filtered_data["ship-state"].unique()
-    )
-    state_avg_revenue = filtered_data[filtered_data["ship-state"].isin(selected_state_visual)].groupby("ship-state")["Revenue per Order"].mean().reset_index()
+# Row 2
+row2_col1, row2_col2, row2_col3 = st.columns(3)
+
+with row2_col1:
+    # Average Revenue by State
+    state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
         x="ship-state",
@@ -205,18 +140,11 @@ with cols[3]:
         color="ship-state",
         color_discrete_sequence=px.colors.qualitative.Set3
     )
-    # Place inside a box with filter
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Shipping State", selected_state_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_avg_state, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# B2B vs Consumer Orders with filter
-with cols[4]:
-    selected_b2b_visual = add_all_option(
-        "Select Business Type for Visual", filtered_data["B2B"].unique(), filtered_data["B2B"].unique()
-    )
-    b2b_data = filtered_data[filtered_data["B2B"].isin(selected_b2b_visual)].groupby("B2B")["Order"].sum().reset_index()
+with row2_col2:
+    # B2B Orders
+    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
         names="B2B",
@@ -224,11 +152,46 @@ with cols[4]:
         title="B2B vs Consumer Orders",
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
-    # Place inside a box with filter
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown(f'<div class="filter-dropdown">{st.selectbox("Select Business Type", selected_b2b_visual)}</div>', unsafe_allow_html=True)
     st.plotly_chart(fig_b2b, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+
+with row2_col3:
+    # Revenue vs Fulfilment Type
+    fulfilment_revenue = filtered_data.groupby("Fulfilment")["Revenue per Order"].sum().reset_index()
+    fig_fulfilment_revenue = px.bar(
+        fulfilment_revenue,
+        x="Fulfilment",
+        y="Revenue per Order",
+        title="Revenue vs Fulfilment Type",
+        color="Fulfilment",
+        color_discrete_sequence=px.colors.qualitative.Pastel1
+    )
+    st.plotly_chart(fig_fulfilment_revenue, use_container_width=True)
+
+# Row 3
+row3_col1, row3_col2 = st.columns(2)
+
+with row3_col1:
+    # Revenue Distribution
+    fig_hist = px.histogram(
+        filtered_data,
+        x="Revenue per Order",
+        title="Revenue Distribution",
+        color_discrete_sequence=["#636EFA"]
+    )
+    st.plotly_chart(fig_hist, use_container_width=True)
+
+with row3_col2:
+    # Revenue vs Orders Scatter Plot
+    fig_revenue_orders = px.scatter(
+        filtered_data,
+        x="Order",
+        y="Revenue per Order",
+        color="Style",
+        title="Revenue vs Orders",
+        labels={"Order": "Orders", "Revenue per Order": "Revenue"}
+    )
+    st.plotly_chart(fig_revenue_orders, use_container_width=True)
+
 
 
 
