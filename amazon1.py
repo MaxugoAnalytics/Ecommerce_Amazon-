@@ -60,7 +60,7 @@ st.markdown("""
     <div class="centered-title">Amazon Sales Dashboard</div>
 """, unsafe_allow_html=True)
 
-# Sidebar filters (Removed the "Product Styles" filter)
+# Sidebar filters (Multi-select options)
 st.sidebar.header("Filters")
 selected_states = st.sidebar.multiselect(
     "Select Shipping States",
@@ -77,12 +77,18 @@ selected_b2b = st.sidebar.multiselect(
     options=amazon["B2B"].unique(),
     default=amazon["B2B"].unique()
 )
+selected_days = st.sidebar.multiselect(
+    "Select Days",
+    options=amazon["Day"].unique(),
+    default=amazon["Day"].unique()
+)
 
 # Apply filters
 filtered_data = amazon[
     (amazon["ship-state"].isin(selected_states)) &
     (amazon["Fulfilment"].isin(selected_fulfilment)) &
-    (amazon["B2B"].isin(selected_b2b))
+    (amazon["B2B"].isin(selected_b2b)) &
+    (amazon["Day"].isin(selected_days))
 ]
 
 # Add calculated columns
@@ -108,13 +114,7 @@ cols = st.columns(5)
 
 # Orders by Fulfilment Type
 with cols[0]:
-    fulfilment_filter = st.selectbox("Select Fulfilment Type", options=["All"] + list(filtered_data["Fulfilment"].unique()))
-    if fulfilment_filter != "All":
-        fulfilment_data = filtered_data[filtered_data["Fulfilment"] == fulfilment_filter]
-    else:
-        fulfilment_data = filtered_data
-
-    fulfilment_data = fulfilment_data.groupby("Fulfilment")["Order"].sum().reset_index()
+    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
@@ -139,13 +139,7 @@ with cols[1]:
 
 # Orders by Day
 with cols[2]:
-    day_filter = st.selectbox("Select Day", options=["All"] + list(filtered_data["Day"].unique()))
-    if day_filter != "All":
-        daily_orders = filtered_data[filtered_data["Day"] == day_filter]
-    else:
-        daily_orders = filtered_data
-
-    daily_orders = daily_orders.groupby("Day")["Order"].sum().reset_index()
+    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
@@ -157,13 +151,7 @@ with cols[2]:
 
 # Average Revenue by State
 with cols[3]:
-    state_filter = st.selectbox("Select Shipping State", options=["All"] + list(filtered_data["ship-state"].unique()))
-    if state_filter != "All":
-        state_avg_revenue = filtered_data[filtered_data["ship-state"] == state_filter]
-    else:
-        state_avg_revenue = filtered_data
-
-    state_avg_revenue = state_avg_revenue.groupby("ship-state")["Revenue per Order"].mean().reset_index()
+    state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
         x="ship-state",
@@ -176,13 +164,7 @@ with cols[3]:
 
 # B2B vs Consumer Orders
 with cols[4]:
-    b2b_filter = st.selectbox("Select Business Type", options=["All"] + list(filtered_data["B2B"].unique()))
-    if b2b_filter != "All":
-        b2b_data = filtered_data[filtered_data["B2B"] == b2b_filter]
-    else:
-        b2b_data = filtered_data
-
-    b2b_data = b2b_data.groupby("B2B")["Order"].sum().reset_index()
+    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
         names="B2B",
@@ -191,5 +173,6 @@ with cols[4]:
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
+
 
 
