@@ -60,29 +60,45 @@ st.markdown("""
     <div class="centered-title">Amazon Sales Dashboard</div>
 """, unsafe_allow_html=True)
 
-# Sidebar filters (Removed the "Product Styles" filter)
+# Sidebar filters (Multi-select options with "All" option)
 st.sidebar.header("Filters")
-selected_states = st.sidebar.multiselect(
-    "Select Shipping States",
-    options=amazon["ship-state"].unique(),
-    default=amazon["ship-state"].unique()
-)
-selected_fulfilment = st.sidebar.multiselect(
-    "Select Fulfilment Type",
-    options=amazon["Fulfilment"].unique(),
-    default=amazon["Fulfilment"].unique()
-)
-selected_b2b = st.sidebar.multiselect(
-    "Select Business Type",
-    options=amazon["B2B"].unique(),
-    default=amazon["B2B"].unique()
-)
+
+# Function to add an "All" option to multiselect
+def add_all_option(filter_name, options, default_value):
+    # Add the 'All' option to the list
+    all_option = ["All"] + list(options)
+    selected_values = st.sidebar.multiselect(
+        filter_name,
+        options=all_option,
+        default=default_value
+    )
+    
+    # If 'All' is selected, return all options
+    if "All" in selected_values:
+        return options
+    else:
+        return selected_values
 
 # Apply filters
+selected_states = add_all_option(
+    "Select Shipping States", amazon["ship-state"].unique(), amazon["ship-state"].unique()
+)
+selected_fulfilment = add_all_option(
+    "Select Fulfilment Type", amazon["Fulfilment"].unique(), amazon["Fulfilment"].unique()
+)
+selected_b2b = add_all_option(
+    "Select Business Type", amazon["B2B"].unique(), amazon["B2B"].unique()
+)
+selected_days = add_all_option(
+    "Select Days", amazon["Day"].unique(), amazon["Day"].unique()
+)
+
+# Apply filters to the data
 filtered_data = amazon[
     (amazon["ship-state"].isin(selected_states)) &
     (amazon["Fulfilment"].isin(selected_fulfilment)) &
-    (amazon["B2B"].isin(selected_b2b))
+    (amazon["B2B"].isin(selected_b2b)) &
+    (amazon["Day"].isin(selected_days))
 ]
 
 # Add calculated columns
@@ -106,15 +122,12 @@ st.markdown("---")
 # Create columns for all visuals
 cols = st.columns(5)
 
-# Orders by Fulfilment Type
+# Orders by Fulfilment Type with filter
 with cols[0]:
-    fulfilment_filter = st.selectbox("Select Fulfilment Type", options=["All"] + list(filtered_data["Fulfilment"].unique()))
-    if fulfilment_filter != "All":
-        fulfilment_data = filtered_data[filtered_data["Fulfilment"] == fulfilment_filter]
-    else:
-        fulfilment_data = filtered_data
-
-    fulfilment_data = fulfilment_data.groupby("Fulfilment")["Order"].sum().reset_index()
+    selected_fulfilment_visual = add_all_option(
+        "Select Fulfilment Type for Visual", filtered_data["Fulfilment"].unique(), filtered_data["Fulfilment"].unique()
+    )
+    fulfilment_data = filtered_data[filtered_data["Fulfilment"].isin(selected_fulfilment_visual)].groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
@@ -124,9 +137,12 @@ with cols[0]:
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
 
-# Revenue by Product Style (no filter applied)
+# Revenue by Product Style with filter
 with cols[1]:
-    style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
+    selected_style_visual = add_all_option(
+        "Select Product Style for Visual", filtered_data["Style"].unique(), filtered_data["Style"].unique()
+    )
+    style_data = filtered_data[filtered_data["Style"].isin(selected_style_visual)].groupby("Style")["Revenue per Order"].sum().reset_index()
     fig_style = px.bar(
         style_data,
         x="Style",
@@ -137,15 +153,12 @@ with cols[1]:
     )
     st.plotly_chart(fig_style, use_container_width=True)
 
-# Orders by Day
+# Orders by Day with filter
 with cols[2]:
-    day_filter = st.selectbox("Select Day", options=["All"] + list(filtered_data["Day"].unique()))
-    if day_filter != "All":
-        daily_orders = filtered_data[filtered_data["Day"] == day_filter]
-    else:
-        daily_orders = filtered_data
-
-    daily_orders = daily_orders.groupby("Day")["Order"].sum().reset_index()
+    selected_day_visual = add_all_option(
+        "Select Days for Visual", filtered_data["Day"].unique(), filtered_data["Day"].unique()
+    )
+    daily_orders = filtered_data[filtered_data["Day"].isin(selected_day_visual)].groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
@@ -155,15 +168,12 @@ with cols[2]:
     )
     st.plotly_chart(fig_day, use_container_width=True)
 
-# Average Revenue by State
+# Average Revenue by State with filter
 with cols[3]:
-    state_filter = st.selectbox("Select Shipping State", options=["All"] + list(filtered_data["ship-state"].unique()))
-    if state_filter != "All":
-        state_avg_revenue = filtered_data[filtered_data["ship-state"] == state_filter]
-    else:
-        state_avg_revenue = filtered_data
-
-    state_avg_revenue = state_avg_revenue.groupby("ship-state")["Revenue per Order"].mean().reset_index()
+    selected_state_visual = add_all_option(
+        "Select Shipping States for Visual", filtered_data["ship-state"].unique(), filtered_data["ship-state"].unique()
+    )
+    state_avg_revenue = filtered_data[filtered_data["ship-state"].isin(selected_state_visual)].groupby("ship-state")["Revenue per Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
         x="ship-state",
@@ -174,15 +184,12 @@ with cols[3]:
     )
     st.plotly_chart(fig_avg_state, use_container_width=True)
 
-# B2B vs Consumer Orders
+# B2B vs Consumer Orders with filter
 with cols[4]:
-    b2b_filter = st.selectbox("Select Business Type", options=["All"] + list(filtered_data["B2B"].unique()))
-    if b2b_filter != "All":
-        b2b_data = filtered_data[filtered_data["B2B"] == b2b_filter]
-    else:
-        b2b_data = filtered_data
-
-    b2b_data = b2b_data.groupby("B2B")["Order"].sum().reset_index()
+    selected_b2b_visual = add_all_option(
+        "Select Business Type for Visual", filtered_data["B2B"].unique(), filtered_data["B2B"].unique()
+    )
+    b2b_data = filtered_data[filtered_data["B2B"].isin(selected_b2b_visual)].groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
         names="B2B",
@@ -191,6 +198,7 @@ with cols[4]:
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
+
 
 
 
