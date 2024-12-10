@@ -72,87 +72,41 @@ amazon = load_data()
 # Header
 st.markdown('<div class="main-header">Amazon Sales Dashboard</div>', unsafe_allow_html=True)
 
-# Filters Section
-st.subheader("Filters")
-fulfilment_filter = st.multiselect(
-    "Select Fulfilment Type",
-    options=["All"] + list(amazon["Fulfilment"].unique()),
-    default=["All"],
-    key="fulfilment_filter",
-)
-
-style_filter = st.multiselect(
-    "Select Product Style",
-    options=["All"] + list(amazon["Style"].unique()),
-    default=["All"],
-    key="style_filter",
-)
-
-day_filter = st.multiselect(
-    "Select Day",
-    options=["All"] + list(amazon["Day"].unique()),
-    default=["All"],
-    key="day_filter",
-)
-
-state_filter = st.multiselect(
-    "Select Shipping State",
-    options=["All"] + list(amazon["ship-state"].unique()),
-    default=["All"],
-    key="state_filter",
-)
-
-b2b_filter = st.multiselect(
-    "Select Business Type",
-    options=["All"] + list(amazon["B2B"].unique()),
-    default=["All"],
-    key="b2b_filter",
-)
-
-# Apply Filters
-filtered_data = amazon[
-    (amazon["Fulfilment"].isin(fulfilment_filter) if "All" not in fulfilment_filter else True) &
-    (amazon["Style"].isin(style_filter) if "All" not in style_filter else True) &
-    (amazon["Day"].isin(day_filter) if "All" not in day_filter else True) &
-    (amazon["ship-state"].isin(state_filter) if "All" not in state_filter else True) &
-    (amazon["B2B"].isin(b2b_filter) if "All" not in b2b_filter else True)
-]
-
 # Metrics Section
 st.subheader("Key Metrics")
 metrics_row = st.columns(5)
 metrics_row[0].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Total Revenue</div>'
-    f'<div class="metric-value">${filtered_data["Order"].sum():,.2f}</div>'
+    f'<div class="metric-value">${amazon["Order"].sum():,.2f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
 metrics_row[1].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Total Orders</div>'
-    f'<div class="metric-value">{filtered_data["Order"].sum():,.0f}</div>'
+    f'<div class="metric-value">{amazon["Order"].sum():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
 metrics_row[2].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Unique Products</div>'
-    f'<div class="metric-value">{filtered_data["Style"].nunique():,.0f}</div>'
+    f'<div class="metric-value">{amazon["Style"].nunique():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
 metrics_row[3].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">States Covered</div>'
-    f'<div class="metric-value">{filtered_data["ship-state"].nunique():,.0f}</div>'
+    f'<div class="metric-value">{amazon["ship-state"].nunique():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
 metrics_row[4].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Fulfillment Types</div>'
-    f'<div class="metric-value">{filtered_data["Fulfilment"].nunique():,.0f}</div>'
+    f'<div class="metric-value">{amazon["Fulfilment"].nunique():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
@@ -161,11 +115,19 @@ metrics_row[4].markdown(
 st.subheader("Data Visualizations")
 
 # Row 1
-row1 = st.columns(3)
+row1 = st.columns(2)
 
 with row1[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
+
+    fulfilment_filter = st.multiselect(
+        "Select Fulfilment Type",
+        options=["All"] + list(amazon["Fulfilment"].unique()),
+        default="All",
+        key="fulfilment_filter",
+    )
+    filtered_data = amazon if "All" in fulfilment_filter else amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
 
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
@@ -180,22 +142,15 @@ with row1[0]:
 
 with row1[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Revenue by Product Style</div>', unsafe_allow_html=True)
-
-    style_data = filtered_data.groupby("Style")["Order"].sum().reset_index()
-    fig_style = px.bar(
-        style_data,
-        x="Style",
-        y="Order",
-        color="Style",
-        color_discrete_sequence=px.colors.qualitative.Pastel,
-    )
-    st.plotly_chart(fig_style, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row1[2]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
+
+    day_filter = st.multiselect(
+        "Select Day",
+        options=["All"] + list(amazon["Day"].unique()),
+        default="All",
+        key="day_filter",
+    )
+    filtered_data = amazon if "All" in day_filter else amazon[amazon["Day"].isin(day_filter)]
 
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
@@ -213,6 +168,14 @@ with row2[0]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
 
+    state_filter = st.multiselect(
+        "Select Shipping State",
+        options=["All"] + list(amazon["ship-state"].unique()),
+        default="All",
+        key="state_filter",
+    )
+    filtered_data = amazon if "All" in state_filter else amazon[amazon["ship-state"].isin(state_filter)]
+
     state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
@@ -228,6 +191,14 @@ with row2[1]:
     st.markdown('<div class="visual-box">', unsafe_allow_html=True)
     st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
 
+    b2b_filter = st.multiselect(
+        "Select Business Type",
+        options=["All"] + list(amazon["B2B"].unique()),
+        default="All",
+        key="b2b_filter",
+    )
+    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
+
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
@@ -237,6 +208,7 @@ with row2[1]:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
