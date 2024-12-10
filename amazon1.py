@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# CSS Styling for Metrics
+# CSS Styling for Metrics and Visuals
 st.markdown("""
 <style>
 [data-testid="stMetric"] {
@@ -32,6 +32,13 @@ st.markdown("""
 
 [data-testid="stMetricDelta"] {
     font-size: 16px;
+}
+
+.styled-chart {
+    background-color: #393939;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -113,7 +120,7 @@ st.markdown("---")
 cols = st.columns(5)
 
 with cols[0]:
-    # Orders by Fulfilment Type
+    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
     fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
@@ -123,9 +130,10 @@ with cols[0]:
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     st.plotly_chart(fig_fulfilment, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[1]:
-    # Revenue by Product Style
+    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
     style_data = filtered_data.groupby("Style")["Revenue per Order"].sum().reset_index()
     fig_style = px.bar(
         style_data,
@@ -136,9 +144,10 @@ with cols[1]:
         color_discrete_sequence=px.colors.qualitative.Pastel
     )
     st.plotly_chart(fig_style, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[2]:
-    # Orders by Day
+    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
     daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
@@ -148,9 +157,10 @@ with cols[2]:
         labels={"Day": "Day", "Order": "Orders"}
     )
     st.plotly_chart(fig_day, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[3]:
-    # Average Revenue by State
+    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
     state_avg_revenue = filtered_data.groupby("ship-state")["Revenue per Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
@@ -161,9 +171,10 @@ with cols[3]:
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     st.plotly_chart(fig_avg_state, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with cols[4]:
-    # B2B vs Consumer Orders
+    st.markdown('<div class="styled-chart">', unsafe_allow_html=True)
     b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
@@ -173,4 +184,6 @@ with cols[4]:
         color_discrete_sequence=["#1f77b4", "#ff7f0e"]
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
