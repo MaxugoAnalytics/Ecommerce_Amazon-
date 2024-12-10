@@ -8,6 +8,16 @@ st.set_page_config(
     layout="wide",
 )
 
+# Load and cache data
+@st.cache_data
+def load_data():
+    url = 'https://drive.google.com/uc?id=1j-6nn-SvsVlw_ySdMa73dbmaa92ehq-Z'
+    amazon = pd.read_csv(url)
+    return amazon
+
+# Load data
+amazon = load_data()
+
 # CSS for Power BI Styling
 st.markdown("""
     <style>
@@ -59,54 +69,85 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load and cache data
-@st.cache_data
-def load_data():
-    url = 'https://drive.google.com/uc?id=1j-6nn-SvsVlw_ySdMa73dbmaa92ehq-Z'
-    amazon = pd.read_csv(url)
-    return amazon
-
-# Load data
-amazon = load_data()
-
-# Header
+# Header Section
 st.markdown('<div class="main-header">Amazon Sales Dashboard</div>', unsafe_allow_html=True)
 
-# Metrics Section
+# Sidebar filters
+st.sidebar.header("Filters")
+selected_styles = st.sidebar.multiselect(
+    "Select Product Styles",
+    options=amazon["Style"].unique(),
+    default=amazon["Style"].unique()
+)
+selected_states = st.sidebar.multiselect(
+    "Select Shipping States",
+    options=amazon["ship-state"].unique(),
+    default=amazon["ship-state"].unique()
+)
+selected_fulfilment = st.sidebar.multiselect(
+    "Select Fulfilment Type",
+    options=amazon["Fulfilment"].unique(),
+    default=amazon["Fulfilment"].unique()
+)
+selected_b2b = st.sidebar.multiselect(
+    "Business Type",
+    options=amazon["B2B"].unique(),
+    default=amazon["B2B"].unique()
+)
+
+# Apply filters
+filtered_data = amazon[
+    (amazon["Style"].isin(selected_styles)) &
+    (amazon["ship-state"].isin(selected_states)) &
+    (amazon["Fulfilment"].isin(selected_fulfilment)) &
+    (amazon["B2B"].isin(selected_b2b))
+]
+
+# Add calculated columns
+filtered_data["Revenue per Order"] = filtered_data["Order"]
+filtered_data["Is Weekend"] = filtered_data["Day"].isin(["Saturday", "Sunday"])
+filtered_data["Has Promotion"] = filtered_data["promotion-ids"] != "No Promotion"
+
+# Key Metrics Section
 st.subheader("Key Metrics")
 metrics_row = st.columns(5)
+
 metrics_row[0].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Total Revenue</div>'
-    f'<div class="metric-value">${amazon["Order"].sum():,.2f}</div>'
+    f'<div class="metric-value">${filtered_data["Revenue per Order"].sum():,.2f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
+
 metrics_row[1].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Total Orders</div>'
-    f'<div class="metric-value">{amazon["Order"].sum():,.0f}</div>'
+    f'<div class="metric-value">{filtered_data["Order"].sum():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
+
 metrics_row[2].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Unique Products</div>'
-    f'<div class="metric-value">{amazon["Style"].nunique():,.0f}</div>'
+    f'<div class="metric-value">{filtered_data["Style"].nunique():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
+
 metrics_row[3].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">States Covered</div>'
-    f'<div class="metric-value">{amazon["ship-state"].nunique():,.0f}</div>'
+    f'<div class="metric-value">{filtered_data["ship-state"].nunique():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
+
 metrics_row[4].markdown(
     '<div class="metric-box">'
     '<div class="metric-title">Fulfillment Types</div>'
-    f'<div class="metric-value">{amazon["Fulfilment"].nunique():,.0f}</div>'
+    f'<div class="metric-value">{filtered_data["Fulfilment"].nunique():,.0f}</div>'
     '</div>',
     unsafe_allow_html=True
 )
@@ -127,9 +168,9 @@ with row1[0]:
         default="All",
         key="fulfilment_filter",
     )
-    filtered_data = amazon if "All" in fulfilment_filter else amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
+    filtered_data_fulfilment = filtered_data if "All" in fulfilment_filter else filtered_data[filtered_data["Fulfilment"].isin(fulfilment_filter)]
 
-    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
+    fulfilment_data = filtered_data_fulfilment.groupby("Fulfilment")["Order"].sum().reset_index()
     fig_fulfilment = px.pie(
         fulfilment_data,
         names="Fulfilment",
@@ -150,9 +191,9 @@ with row1[1]:
         default="All",
         key="day_filter",
     )
-    filtered_data = amazon if "All" in day_filter else amazon[amazon["Day"].isin(day_filter)]
+    filtered_data_day = filtered_data if "All" in day_filter else filtered_data[filtered_data["Day"].isin(day_filter)]
 
-    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
+    daily_orders = filtered_data_day.groupby("Day")["Order"].sum().reset_index()
     fig_day = px.line(
         daily_orders,
         x="Day",
@@ -174,9 +215,9 @@ with row2[0]:
         default="All",
         key="state_filter",
     )
-    filtered_data = amazon if "All" in state_filter else amazon[amazon["ship-state"].isin(state_filter)]
+    filtered_data_state = filtered_data if "All" in state_filter else filtered_data[filtered_data["ship-state"].isin(state_filter)]
 
-    state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
+    state_avg_revenue = filtered_data_state.groupby("ship-state")["Order"].mean().reset_index()
     fig_avg_state = px.bar(
         state_avg_revenue,
         x="ship-state",
@@ -197,9 +238,9 @@ with row2[1]:
         default="All",
         key="b2b_filter",
     )
-    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
+    filtered_data_b2b = filtered_data if "All" in b2b_filter else filtered_data[filtered_data["B2B"].isin(b2b_filter)]
 
-    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
+    b2b_data = filtered_data_b2b.groupby("B2B")["Order"].sum().reset_index()
     fig_b2b = px.pie(
         b2b_data,
         names="B2B",
@@ -208,6 +249,7 @@ with row2[1]:
     )
     st.plotly_chart(fig_b2b, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
