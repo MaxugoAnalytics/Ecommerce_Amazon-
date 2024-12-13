@@ -5,7 +5,7 @@ import os
 
 st.set_page_config(
     page_title="Amazon Sales Dashboard by Maxwell Adigwe",layout="wide")
-st.title('Amazon Sales Dashboard by Maxwell Adigwe'
+st.title('Amazon Sales Dashboard by Maxwell Adigwe')
 st.markdown('<style>div.block.container{padding-top:lrem}</style>', unsafe_allow_html=True)
 
 # CSS for Power BI Styling
