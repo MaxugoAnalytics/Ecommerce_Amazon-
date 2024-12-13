@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os 
 
-# Set page configuration
 st.set_page_config(
-    page_title="Amazon Sales Dashboard by Maxwell Adigwe",
-    layout="wide",
-)
+    page_title="Amazon Sales Dashboard by Maxwell Adigwe",layout="wide")
+st.title('Amazon Sales Dashboard by Maxwell Adigwe'
+st.markdown('<style>div.block.container{padding-top:lrem}</style>', unsafe_allow_html=True)
 
 # CSS for Power BI Styling
 st.markdown("""
@@ -68,9 +68,6 @@ def load_data():
 
 # Load data
 amazon = load_data()
-
-# Header
-st.markdown('<div class="main-header">Amazon Sales Dashboard by Maxwell Adigwe</div>', unsafe_allow_html=True)
 
 # Metrics Section
 st.subheader("Key Metrics")
