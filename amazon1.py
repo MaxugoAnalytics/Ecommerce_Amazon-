@@ -8,57 +8,6 @@ st.set_page_config(
 st.title('Amazon Sales Dashboard by Maxwell Adigwe')
 st.markdown('<style>div.block.container{padding-top:lrem}</style>', unsafe_allow_html=True)
 
-# CSS for Power BI Styling
-st.markdown("""
-    <style>
-        body {
-            background-color: #f4f4f4;
-        }
-
-        .main-header {
-            background-color: #232F3E;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-
-        .metric-box, .visual-box {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .metric-box .metric-title {
-            font-weight: bold;
-            color: #555;
-        }
-
-        .metric-box .metric-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #232F3E;
-        }
-
-        .visual-title {
-            font-weight: bold;
-            font-size: 12px;  /* Reduced title font size */
-            text-align: center;
-            color: #232F3E;
-            margin-bottom: 5px;  /* Reduced space between title and chart */
-        }
-
-        .dropdown-label {
-            font-weight: bold;
-            color: #232F3E;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 # Load and cache data
 @st.cache_data
 def load_data():
