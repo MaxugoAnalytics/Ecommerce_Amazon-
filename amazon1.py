@@ -3,8 +3,8 @@ import pandas as pd
 import plotly.express as px
 import os 
 
-st.set_page_config(page_title="Amazon Sales!!!", layout = "wide")
-st.title('Amazon Sales Dashboard by Maxwell Adigwe')
+st.set_page_config(page_title="Amazon Sales!!!",page_icon= ":bar_chart:", layout = "wide")
+st.title(':bar_chart: Amazon Sales Dashboard by Maxwell Adigwe')
 st.markdown('<style>div.block-container{padding-top:lrem;}</style>', unsafe_allow_html=True)
 
 # Load and cache data
