@@ -1,186 +1,138 @@
-import streamlit as st
 import pandas as pd
 import plotly.express as px
-import os 
+import streamlit as st
+import warnings
 
-st.set_page_config(page_title="Amazon Sales!!!",page_icon= ":bar_chart:", layout = "wide")
-st.title(':bar_chart: Amazon Sales Dashboard by Maxwell Adigwe')
-st.markdown('<style>div.block-container{padding-top:lrem;}</style>', unsafe_allow_html=True)
+warnings.filterwarnings('ignore')
 
-# Load and cache data
-@st.cache_data
-def load_data():
-    url = 'https://drive.google.com/uc?id=1j-6nn-SvsVlw_ySdMa73dbmaa92ehq-Z'
-    amazon = pd.read_csv(url)
-    return amazon
+st.title("Interactive Retail Dashboard by Maxwell Adigwe")
 
 # Load data
-amazon = load_data()
+url = "https://raw.githubusercontent.com/AbhisheakSaraswat/PythonStreamlit/main/Adidas.xlsx"
+df_cleaned = pd.read_excel(url)
 
-# Metrics Section
-st.subheader("Key Metrics")
-metrics_row = st.columns(5)
-metrics_row[0].markdown(
-    '<div class="metric-box">'
-    '<div class="metric-title">Total Revenue</div>'
-    f'<div class="metric-value">${amazon["Order"].sum():,.2f}</div>'
-    '</div>',
-    unsafe_allow_html=True
-)
-metrics_row[1].markdown(
-    '<div class="metric-box">'
-    '<div class="metric-title">Total Orders</div>'
-    f'<div class="metric-value">{amazon["Order"].sum():,.0f}</div>'
-    '</div>',
-    unsafe_allow_html=True
-)
-metrics_row[2].markdown(
-    '<div class="metric-box">'
-    '<div class="metric-title">Unique Products</div>'
-    f'<div class="metric-value">{amazon["Style"].nunique():,.0f}</div>'
-    '</div>',
-    unsafe_allow_html=True
-)
-metrics_row[3].markdown(
-    '<div class="metric-box">'
-    '<div class="metric-title">States Covered</div>'
-    f'<div class="metric-value">{amazon["ship-state"].nunique():,.0f}</div>'
-    '</div>',
-    unsafe_allow_html=True
-)
-metrics_row[4].markdown(
-    '<div class="metric-box">'
-    '<div class="metric-title">Fulfillment Types</div>'
-    f'<div class="metric-value">{amazon["Fulfilment"].nunique():,.0f}</div>'
-    '</div>',
-    unsafe_allow_html=True
-)
+# Preprocess data
+df_cleaned['InvoiceDate'] = pd.to_datetime(df_cleaned['InvoiceDate'])
+df_cleaned['Year'] = df_cleaned['InvoiceDate'].dt.year
+df_cleaned['Month'] = df_cleaned['InvoiceDate'].dt.month
+df_cleaned['Day'] = df_cleaned['InvoiceDate'].dt.day
+df_cleaned['Time'] = df_cleaned['InvoiceDate'].dt.time
 
-# Data Visualizations Section
-st.subheader("Data Visualizations")
+# Function to handle "Select All" logic
+def apply_filter(options, selected):
+    if "All" in selected:
+        return options
+    return selected
 
-# Row 1 (Three Columns with Further Reduced Widths)
-row1 = st.columns([0.017, 0.017, 0.017])  # Further reduced column sizes
+# First Row: Key Metrics Overview
+col1, col2 = st.columns(2)
 
-with row1[0]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Orders by Fulfilment Type</div>', unsafe_allow_html=True)
+with col1:
+    # Total Sales
+    total_sales = df_cleaned["TotalSales"].sum()
+    st.metric("Total Sales ($)", f"${total_sales:,.2f}")
 
-    fulfilment_filter = st.multiselect(
-        "Select Fulfilment Type",
-        options=["All"] + list(amazon["Fulfilment"].unique()),
-        default="All",
-        key="fulfilment_filter",
+with col2:
+    # Operating Profit
+    total_profit = df_cleaned["OperatingProfit"].sum()
+    st.metric("Operating Profit ($)", f"${total_profit:,.2f}")
+
+# Second Row: Visualizations with filters
+col3, col4, col5, col6, col7 = st.columns(5)
+
+with col3:
+    # Sales by Method
+    st.subheader("Sales by Method")
+    method_options = ["All"] + df_cleaned["SalesMethod"].unique().tolist()
+    method_filter = st.multiselect("Filter by Sales Method", options=method_options, default="All")
+    filtered_method = df_cleaned[df_cleaned["SalesMethod"].isin(apply_filter(method_options, method_filter))]
+    sales_method = filtered_method.groupby("SalesMethod")["TotalSales"].sum().reset_index()
+    st.bar_chart(sales_method.set_index("SalesMethod"))
+
+with col4:
+    # Yearly Sales vs Profit Comparison
+    st.subheader("Yearly Sales vs Profit")
+    year_options = ["All"] + df_cleaned["Year"].unique().tolist()
+    year_filter = st.multiselect("Filter by Year", options=year_options, default="All")
+    filtered_year = df_cleaned[df_cleaned["Year"].isin(apply_filter(year_options, year_filter))]
+    yearly_comparison = filtered_year.groupby("Year")[["TotalSales", "OperatingProfit"]].sum().reset_index()
+    st.bar_chart(yearly_comparison.set_index("Year"))
+
+with col5:
+    # Profit Margin Trends
+    st.subheader("Yearly Profit Margin Trends")
+    product_options = ["All"] + df_cleaned["Product"].unique().tolist()
+    product_filter = st.multiselect("Filter by Product", options=product_options, default="All")
+    filtered_product = df_cleaned[df_cleaned["Product"].isin(apply_filter(product_options, product_filter))]
+    filtered_product["ProfitMargin"] = (
+        filtered_product["OperatingProfit"] / filtered_product["TotalSales"]
+    ) * 100
+    yearly_profit_margin = filtered_product.groupby("Year")["ProfitMargin"].mean().reset_index()
+    st.line_chart(yearly_profit_margin.set_index("Year"), use_container_width=True)
+
+with col6:
+    # Regional Sales Distribution
+    st.subheader("Regional Sales Distribution")
+    region_options = ["All"] + df_cleaned["Region"].unique().tolist()
+    region_filter = st.multiselect("Filter by Region", options=region_options, default="All")
+    filtered_region = df_cleaned[df_cleaned["Region"].isin(apply_filter(region_options, region_filter))]
+    regional_sales = filtered_region.groupby("Region")["TotalSales"].sum().reset_index()
+    st.bar_chart(regional_sales.set_index("Region"))
+
+with col7:
+    # Top Selling Products
+    st.subheader("Top 5 Selling Products")
+    state_options = ["All"] + df_cleaned["State"].unique().tolist()
+    state_filter = st.multiselect("Filter by State", options=state_options, default="All")
+    filtered_state = df_cleaned[df_cleaned["State"].isin(apply_filter(state_options, state_filter))]
+    top_products = filtered_state.groupby("Product")["TotalSales"].sum().nlargest(5).reset_index()
+    st.bar_chart(top_products.set_index("Product"))
+
+# Third Row: Additional Visualizations with Filters
+col8, col9, col10, col11, col12 = st.columns(5)
+
+with col8:
+    # Sales vs Operating Profit Scatter Plot
+    st.subheader("Sales vs Operating Profit")
+    city_options = ["All"] + df_cleaned["City"].unique().tolist()
+    city_filter = st.multiselect("Filter by City", options=city_options, default="All")
+    filtered_city = df_cleaned[df_cleaned["City"].isin(apply_filter(city_options, city_filter))]
+    fig_sales_profit = px.scatter(
+        filtered_city, 
+        x="TotalSales", 
+        y="OperatingProfit", 
+        color="Product", 
+        template="plotly_dark"
     )
-    filtered_data = amazon if "All" in fulfilment_filter else amazon[amazon["Fulfilment"].isin(fulfilment_filter)]
+    st.plotly_chart(fig_sales_profit)
 
-    fulfilment_data = filtered_data.groupby("Fulfilment")["Order"].sum().reset_index()
-    fig_fulfilment = px.pie(
-        fulfilment_data,
-        names="Fulfilment",
-        values="Order",
-        color_discrete_sequence=px.colors.qualitative.Set3,
-        title=""
+with col9:
+    # Monthly Sales Trends
+    st.subheader("Monthly Sales Trends")
+    monthly_sales = filtered_city.groupby("Month")["TotalSales"].sum().reset_index()
+    st.line_chart(monthly_sales.set_index("Month"), use_container_width=True)
+
+with col10:
+    # Profit Margin Distribution
+    st.subheader("Profit Margin Distribution")
+    st.bar_chart(filtered_city["ProfitMargin"])
+
+with col11:
+    # Profit vs Sales by Region (Scatter Plot)
+    st.subheader("Profit vs Sales by Region")
+    fig_profit_sales_region = px.scatter(
+        filtered_city, 
+        x="TotalSales", 
+        y="OperatingProfit", 
+        color="Region", 
+        template="plotly_dark"
     )
-    st.plotly_chart(fig_fulfilment, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.plotly_chart(fig_profit_sales_region)
 
-with row1[1]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Orders by Day</div>', unsafe_allow_html=True)
+with col12:
+    # Daily Sales Trends
+    st.subheader("Daily Sales Trends")
+    daily_sales = filtered_city.groupby("Day")["TotalSales"].sum().reset_index()
+    st.line_chart(daily_sales.set_index("Day"), use_container_width=True)
 
-    day_filter = st.multiselect(
-        "Select Day",
-        options=["All"] + list(amazon["Day"].unique()),
-        default="All",
-        key="day_filter",
-    )
-    filtered_data = amazon if "All" in day_filter else amazon[amazon["Day"].isin(day_filter)]
-
-    daily_orders = filtered_data.groupby("Day")["Order"].sum().reset_index()
-    fig_day = px.line(
-        daily_orders,
-        x="Day",
-        y="Order",
-    )
-    st.plotly_chart(fig_day, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row1[2]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">B2B vs Consumer Orders</div>', unsafe_allow_html=True)
-
-    b2b_filter = st.multiselect(
-        "Select Business Type",
-        options=["All"] + list(amazon["B2B"].unique()),
-        default="All",
-        key="b2b_filter",
-    )
-    filtered_data = amazon if "All" in b2b_filter else amazon[amazon["B2B"].isin(b2b_filter)]
-
-    b2b_data = filtered_data.groupby("B2B")["Order"].sum().reset_index()
-    fig_b2b = px.pie(
-        b2b_data,
-        names="B2B",
-        values="Order",
-        color_discrete_sequence=["#1f77b4", "#ff7f0e"],
-    )
-    st.plotly_chart(fig_b2b, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Row 2 (Three Columns with Further Reduced Widths)
-row2 = st.columns([0.017, 0.017, 0.017])  # Further reduced column sizes
-
-with row2[0]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Average Revenue by State</div>', unsafe_allow_html=True)
-
-    state_filter = st.multiselect(
-        "Select Shipping State",
-        options=["All"] + list(amazon["ship-state"].unique()),
-        default="All",
-        key="state_filter",
-    )
-    filtered_data = amazon if "All" in state_filter else amazon[amazon["ship-state"].isin(state_filter)]
-
-    state_avg_revenue = filtered_data.groupby("ship-state")["Order"].mean().reset_index()
-    fig_avg_state = px.bar(
-        state_avg_revenue,
-        x="ship-state",
-        y="Order",
-        color="ship-state",
-        color_discrete_sequence=px.colors.qualitative.Set3,
-    )
-    st.plotly_chart(fig_avg_state, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row2[1]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Orders by Product Category</div>', unsafe_allow_html=True)
-
-    category_data = filtered_data.groupby("Category")["Order"].sum().reset_index()
-    fig_category = px.bar(
-        category_data,
-        x="Category",
-        y="Order",
-        color="Category",
-        color_discrete_sequence=px.colors.qualitative.Set3,
-    )
-    st.plotly_chart(fig_category, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with row2[2]:
-    st.markdown('<div class="visual-box">', unsafe_allow_html=True)
-    st.markdown('<div class="visual-title">Top 10 States by Revenue</div>', unsafe_allow_html=True)
-
-    top_states = filtered_data.groupby("ship-state")["Order"].sum().reset_index().nlargest(10, "Order")
-    fig_top_states = px.bar(
-        top_states,
-        x="ship-state",
-        y="Order",
-        color="ship-state",
-        color_discrete_sequence=px.colors.qualitative.Set3,
-    )
-    st.plotly_chart(fig_top_states, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
